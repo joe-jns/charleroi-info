@@ -1,0 +1,90 @@
+---
+import { Icon } from 'astro-icon/components';
+import { latestJobs } from '../data/jobs';
+import { upcomingEvents } from '../data/events';
+---
+
+<section class="border-b border-border bg-surface-muted">
+  <div class="u-container py-16 lg:py-20">
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
+      <!-- Emploi -->
+      <div class="flex flex-col rounded-[12px] border border-border bg-surface p-5 sm:p-6">
+        <div class="flex items-center justify-between gap-4">
+          <div class="flex items-center gap-2.5">
+            <span class="grid size-9 place-items-center rounded-[8px] bg-accent-tint text-accent">
+              <Icon name="ph:briefcase-bold" class="size-5" />
+            </span>
+            <h2 class="text-xl font-extrabold tracking-tight">Offres d’emploi</h2>
+          </div>
+          <a href={`${import.meta.env.BASE_URL}emploi`} class="inline-flex items-center gap-1 text-sm font-semibold text-accent transition-colors hover:text-accent-hover">
+            Tout voir
+            <Icon name="ph:arrow-right-bold" class="size-3.5" />
+          </a>
+        </div>
+
+        <div class="mt-2 divide-y divide-border">
+          {latestJobs.map((j) => (
+            <a href={`${import.meta.env.BASE_URL}emploi/${j.slug}`} class="group flex items-center gap-4 py-4">
+              <div class="min-w-0 flex-1">
+                <h3 class="truncate font-semibold text-ink transition-colors group-hover:text-accent">
+                  {j.title}
+                </h3>
+                <p class="mt-0.5 truncate text-sm text-ink-soft">{j.company} · {j.commune}</p>
+                <div class="mt-2 flex flex-wrap items-center gap-1.5">
+                  <span class="rounded-[6px] bg-accent-tint px-2 py-0.5 text-xs font-semibold text-accent">{j.contract}</span>
+                  <span class="rounded-[6px] bg-surface-sunken px-2 py-0.5 text-xs font-medium text-ink-soft">{j.sector}</span>
+                </div>
+              </div>
+              <div class="flex shrink-0 items-center gap-2">
+                <span class="hidden text-xs text-ink-faint sm:inline">{j.posted}</span>
+                <Icon name="ph:caret-right-bold" class="size-4 text-ink-faint transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-accent" />
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <!-- Événements -->
+      <div class="flex flex-col rounded-[12px] border border-border bg-surface p-5 sm:p-6">
+        <div class="flex items-center justify-between gap-4">
+          <div class="flex items-center gap-2.5">
+            <span class="grid size-9 place-items-center rounded-[8px] bg-accent-tint text-accent">
+              <Icon name="ph:calendar-dots-bold" class="size-5" />
+            </span>
+            <h2 class="text-xl font-extrabold tracking-tight">Événements à venir</h2>
+          </div>
+          <a href={`${import.meta.env.BASE_URL}evenements`} class="inline-flex items-center gap-1 text-sm font-semibold text-accent transition-colors hover:text-accent-hover">
+            Tout voir
+            <Icon name="ph:arrow-right-bold" class="size-3.5" />
+          </a>
+        </div>
+
+        <div class="mt-2 divide-y divide-border">
+          {upcomingEvents.map((e) => (
+            <a href={`${import.meta.env.BASE_URL}evenements/${e.slug}`} class="group flex items-center gap-4 py-4">
+              <div class="grid size-14 shrink-0 place-items-center rounded-[8px] border border-border bg-surface-muted leading-none">
+                <span class="text-lg font-extrabold text-ink">{e.day}</span>
+                <span class="mt-0.5 font-mono text-[0.65rem] font-semibold tracking-wider text-accent">{e.month}</span>
+              </div>
+              <div class="min-w-0 flex-1">
+                <h3 class="truncate font-semibold text-ink transition-colors group-hover:text-accent">
+                  {e.title}
+                </h3>
+                <p class="mt-0.5 truncate text-sm text-ink-soft">
+                  {e.venue} · {e.commune}
+                </p>
+                <p class="mt-1 flex items-center gap-1 text-xs text-ink-faint">
+                  <Icon name="ph:clock-bold" class="size-3.5" />
+                  {e.time}
+                  <span class="mx-1">·</span>
+                  {e.category}
+                </p>
+              </div>
+              <Icon name="ph:caret-right-bold" class="size-4 shrink-0 text-ink-faint transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-accent" />
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

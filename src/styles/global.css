@@ -1,0 +1,203 @@
+@import "tailwindcss";
+
+@import "@fontsource-variable/libre-franklin";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+
+/* ---------------------------------------------------------------------------
+   Charleroi Direct — design tokens
+   Institutional civic portal. One accent (civic blue). Light + dark.
+   Radius scale locked: 8px default, 12px large surfaces, full for tags only.
+--------------------------------------------------------------------------- */
+@theme {
+  --font-sans: "Libre Franklin Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Libre Franklin Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  /* Neutrals — light */
+  --color-ink: #0f1729;
+  --color-ink-soft: #475467;
+  --color-ink-faint: #6b7686;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f4f6f9;
+  --color-surface-sunken: #eceff4;
+  --color-border: #e2e6ec;
+  --color-border-strong: #cfd5df;
+
+  /* Accent — civic blue (primary) */
+  --color-accent: #0e4fc0;
+  --color-accent-hover: #0a3f9d;
+  --color-accent-ink: #ffffff;
+  --color-accent-tint: #e9f0ff;
+  --color-accent-tint-2: #d7e4ff;
+
+  /* Signature — warm gold (identité carolo, usage parcimonieux) */
+  --color-mark: #e0a11a;
+
+  /* Focus + radius */
+  --color-focus: #0e4fc0;
+  --radius-tag: 999px;
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    color-scheme: light;
+  }
+
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-synthesis-weight: none;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Display face for headings gives the page a voice */
+  h1, h2, h3, .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
+  ::selection {
+    background: var(--color-accent-tint-2);
+    color: var(--color-ink);
+  }
+
+  /* Consistent, visible focus for a public-service audience */
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Component primitives (kept small; utilities do most of the work)
+--------------------------------------------------------------------------- */
+@layer components {
+  .u-container {
+    width: 100%;
+    max-width: 1240px;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+  @media (min-width: 1024px) {
+    .u-container { padding-inline: 2rem; }
+  }
+
+  /* Buttons — 8px radius, tactile press, single accent */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    line-height: 1;
+    border-radius: var(--radius);
+    padding: 0.72rem 1.1rem;
+    white-space: nowrap;
+    transition: background-color .18s ease, color .18s ease,
+                border-color .18s ease, transform .06s ease;
+  }
+  .btn:active { transform: translateY(1px); }
+
+  .btn-primary {
+    background: var(--color-accent);
+    color: var(--color-accent-ink);
+  }
+  .btn-primary:hover { background: var(--color-accent-hover); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--color-ink);
+    border: 1px solid var(--color-border-strong);
+  }
+  .btn-ghost:hover {
+    background: var(--color-surface-muted);
+    border-color: var(--color-ink-faint);
+  }
+
+  /* Signature mark — short gold bar above a section title */
+  .section-mark {
+    display: block;
+    width: 2.25rem;
+    height: 3px;
+    border-radius: 999px;
+    background: var(--color-mark);
+    margin-bottom: 1rem;
+  }
+
+  /* Kicker — the ONE mono micro-label we allow (rationed per page) */
+  .kicker {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-ink-faint);
+  }
+
+  /* Hide scrollbar entirely (horizontal tab strips, etc.) */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Custom thin scrollbar (dropdowns, scroll panels) */
+  .scrollbar-civic {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border-strong) transparent;
+  }
+  .scrollbar-civic::-webkit-scrollbar {
+    width: 10px;
+  }
+  .scrollbar-civic::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-civic::-webkit-scrollbar-thumb {
+    background-color: var(--color-border-strong);
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  .scrollbar-civic::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-ink-faint);
+  }
+
+  /* Quick-search chips */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-ink-soft);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-tag);
+    padding: 0.4rem 0.85rem;
+    transition: border-color .16s ease, color .16s ease, background-color .16s ease;
+  }
+  .chip:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent-tint-2);
+    background: var(--color-accent-tint);
+  }
+}

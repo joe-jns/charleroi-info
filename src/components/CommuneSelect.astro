@@ -1,0 +1,188 @@
+---
+import { Icon } from 'astro-icon/components';
+import { communes } from '../data/communes';
+
+interface Props {
+  name?: string;
+}
+const { name = 'commune' } = Astro.props;
+---
+
+<div class="relative" data-commune-select>
+  <input type="hidden" name={name} value="" data-commune-input />
+
+  <div class="flex items-center gap-2.5 rounded-[8px] px-3 py-2.5" data-commune-row>
+    <Icon name="ph:map-pin-bold" class="size-5 shrink-0 text-[#6b7686]" />
+    <input
+      type="text"
+      role="combobox"
+      autocomplete="off"
+      spellcheck="false"
+      aria-expanded="false"
+      aria-autocomplete="list"
+      aria-controls="commune-listbox"
+      placeholder="Toute la métropole"
+      class="w-full min-w-[9rem] cursor-pointer bg-transparent text-[0.95rem] font-medium text-[#0f1729] caret-transparent outline-none placeholder:font-medium placeholder:text-[#6b7686]"
+      data-commune-search
+    />
+    <Icon
+      name="ph:caret-down-bold"
+      class="size-3.5 shrink-0 cursor-pointer text-[#6b7686] transition-transform duration-200"
+      data-commune-caret
+    />
+  </div>
+
+  <div
+    id="commune-listbox"
+    class="scrollbar-civic absolute left-0 top-[calc(100%+0.5rem)] z-50 hidden max-h-72 w-[min(19rem,80vw)] overflow-auto rounded-[10px] border border-[#e2e6ec] bg-white p-1 shadow-[0_18px_50px_rgba(9,13,22,0.22)]"
+    role="listbox"
+    data-commune-menu
+  >
+    <button
+      type="button"
+      role="option"
+      class="commune-option group flex w-full items-center gap-2 rounded-[6px] px-3 py-2 text-left text-[0.9rem] text-[#0f1729] transition-colors hover:bg-[#f4f6f9] aria-selected:bg-[#e9f0ff] aria-selected:text-[#0e4fc0]"
+      data-value=""
+      data-name="Toute la métropole"
+      aria-selected="true"
+    >
+      <Icon name="ph:check-bold" class="size-4 shrink-0 text-[#0e4fc0] opacity-0 group-aria-selected:opacity-100" />
+      <span class="flex-1 font-medium">Toute la métropole</span>
+    </button>
+
+    {communes.map((c) => (
+      <button
+        type="button"
+        role="option"
+        class="commune-option group flex w-full items-center gap-2 rounded-[6px] px-3 py-2 text-left text-[0.9rem] text-[#0f1729] transition-colors hover:bg-[#f4f6f9] aria-selected:bg-[#e9f0ff] aria-selected:text-[#0e4fc0]"
+        data-value={c.slug}
+        data-name={c.name}
+        data-postal={c.postal}
+        aria-selected="false"
+      >
+        <Icon name="ph:check-bold" class="size-4 shrink-0 text-[#0e4fc0] opacity-0 group-aria-selected:opacity-100" />
+        <span class="flex-1">{c.name}</span>
+        <span class="font-mono text-xs text-[#6b7686]">{c.postal}</span>
+      </button>
+    ))}
+
+    <p class="hidden px-3 py-3 text-center text-[0.85rem] text-[#6b7686]" data-commune-empty>
+      Aucune commune trouvée
+    </p>
+  </div>
+</div>
+
+<script>
+  const norm = (s: string) =>
+    s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+
+  document.querySelectorAll<HTMLElement>('[data-commune-select]').forEach((root) => {
+    const search = root.querySelector<HTMLInputElement>('[data-commune-search]')!;
+    const hidden = root.querySelector<HTMLInputElement>('[data-commune-input]')!;
+    const menu = root.querySelector<HTMLElement>('[data-commune-menu]')!;
+    const caret = root.querySelector<HTMLElement>('[data-commune-caret]')!;
+    const empty = root.querySelector<HTMLElement>('[data-commune-empty]')!;
+    const options = Array.from(root.querySelectorAll<HTMLButtonElement>('.commune-option'));
+
+    let committed = { slug: '', name: '' };
+
+    const open = () => {
+      menu.classList.remove('hidden');
+      search.setAttribute('aria-expanded', 'true');
+      caret.style.transform = 'rotate(180deg)';
+    };
+    const close = () => {
+      menu.classList.add('hidden');
+      search.setAttribute('aria-expanded', 'false');
+      caret.style.transform = '';
+      search.style.caretColor = 'transparent';
+      search.style.cursor = 'pointer';
+    };
+
+    const filter = () => {
+      const q = norm(search.value);
+      let visible = 0;
+      options.forEach((opt) => {
+        const name = norm(opt.dataset.name ?? '');
+        const postal = opt.dataset.postal ?? '';
+        const match = !q || name.includes(q) || postal.includes(q);
+        opt.hidden = !match;
+        if (match) visible++;
+      });
+      empty.classList.toggle('hidden', visible > 0);
+    };
+
+    // Browsing (click/focus, not typing) always shows the full list.
+    const showAll = () => {
+      options.forEach((opt) => (opt.hidden = false));
+      empty.classList.add('hidden');
+    };
+
+    const commit = (slug: string, name: string) => {
+      committed = { slug, name };
+      hidden.value = slug;
+      search.value = slug ? name : '';
+      options.forEach((o) => o.setAttribute('aria-selected', String((o.dataset.value ?? '') === slug)));
+    };
+
+    // Reconcile free-typed text on close: exact match wins, else revert.
+    const reconcile = () => {
+      const q = norm(search.value);
+      if (!q) return commit('', 'Toute la métropole');
+      const match = options.find(
+        (o) => o.dataset.value && (norm(o.dataset.name ?? '') === q || o.dataset.postal === q),
+      );
+      if (match) return commit(match.dataset.value ?? '', match.dataset.name ?? '');
+      search.value = committed.slug ? committed.name : '';
+    };
+
+    const isOpen = () => !menu.classList.contains('hidden');
+    // Button-like by default; becomes a real text field only while typing.
+    const setTyping = (on: boolean) => {
+      search.style.caretColor = on ? 'auto' : 'transparent';
+      search.style.cursor = on ? 'text' : 'pointer';
+    };
+
+    // Opening shows the FULL list (browse); the field stays button-like until typed.
+    search.addEventListener('focus', () => { showAll(); open(); search.select(); });
+    search.addEventListener('mousedown', () => { if (!isOpen()) { showAll(); open(); } });
+
+    search.addEventListener('input', () => {
+      setTyping(true);
+      filter();
+      open();
+    });
+
+    search.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const first = options.find((o) => !o.hidden);
+        if (first) { e.preventDefault(); commit(first.dataset.value ?? '', first.dataset.name ?? ''); close(); }
+      } else if (e.key === 'Escape') {
+        search.value = committed.slug ? committed.name : '';
+        close();
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        (options.find((o) => !o.hidden))?.focus();
+      }
+    });
+
+    caret.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      if (isOpen()) { close(); return; }
+      showAll();
+      open();
+      search.focus();
+    });
+
+    options.forEach((opt) => {
+      opt.addEventListener('click', () => {
+        commit(opt.dataset.value ?? '', opt.dataset.name ?? '');
+        close();
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!root.contains(e.target as Node)) { reconcile(); close(); }
+    });
+  });
+</script>

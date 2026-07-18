@@ -1,0 +1,117 @@
+---
+import { communes } from '../data/communes';
+---
+
+<section class="border-b border-border bg-surface-muted">
+  <div class="u-container py-16 lg:py-20">
+    <div class="max-w-[52ch]">
+      <h2 class="text-2xl font-extrabold tracking-tight sm:text-3xl">
+        Explorez la métropole
+      </h2>
+      <p class="mt-2 text-ink-soft">
+        Cliquez sur une commune pour découvrir ses commerces, services et infos pratiques.
+      </p>
+    </div>
+
+    <div class="relative isolate z-0 mt-8 overflow-hidden rounded-[12px] border border-border-strong bg-surface shadow-[0_1px_2px_rgba(15,23,41,0.04)]">
+      <div id="communes-map" class="h-[420px] w-full lg:h-[480px]"></div>
+    </div>
+
+    <!-- Accès direct texte (accessibilité + SEO) -->
+    <p class="mt-5 text-sm leading-relaxed text-ink-soft">
+      <span class="font-semibold text-ink">Accès direct&nbsp;:</span>{' '}
+      {communes.map((c, i) => (
+        <>
+          <a href={`${import.meta.env.BASE_URL}${c.slug}`} class="font-medium text-accent transition-colors hover:text-accent-hover hover:underline">{c.name}</a>{i < communes.length - 1 ? ' · ' : ''}
+        </>
+      ))}
+    </p>
+  </div>
+
+  <script
+    type="application/json"
+    id="communes-data"
+    set:html={JSON.stringify(
+      communes.map((c) => ({ slug: c.slug, name: c.name, postal: c.postal, lat: c.lat, lng: c.lng })),
+    )}
+  />
+</section>
+
+<script>
+  import L from 'leaflet';
+  import 'leaflet/dist/leaflet.css';
+
+  const el = document.getElementById('communes-map');
+  const dataEl = document.getElementById('communes-data');
+
+  if (el && dataEl) {
+    type C = { slug: string; name: string; postal: string; lat: number; lng: number };
+    const data: C[] = JSON.parse(dataEl.textContent || '[]');
+
+    const map = L.map(el, {
+      scrollWheelZoom: false,
+      zoomControl: true,
+    }).setView([50.418, 4.44], 12);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      subdomains: 'abcd',
+      maxZoom: 19,
+      attribution: '© OpenStreetMap · © CARTO',
+    }).addTo(map);
+
+    const points: [number, number][] = [];
+
+    data.forEach((c) => {
+      const marker = L.circleMarker([c.lat, c.lng], {
+        radius: 8,
+        color: '#0e4fc0',
+        weight: 2,
+        fillColor: '#0e4fc0',
+        fillOpacity: 0.55,
+      }).addTo(map);
+
+      marker.bindTooltip(c.name, { direction: 'top', offset: [0, -6] });
+      marker.bindPopup(
+        `<div class="map-popup"><strong>${c.name}</strong> <span>${c.postal}</span>` +
+          `<a href="${import.meta.env.BASE_URL}${c.slug}">Voir la commune →</a></div>`,
+      );
+      marker.on('mouseover', () => marker.setStyle({ fillOpacity: 0.9, radius: 10 }));
+      marker.on('mouseout', () => marker.setStyle({ fillOpacity: 0.55, radius: 8 }));
+
+      points.push([c.lat, c.lng]);
+    });
+
+    if (points.length) map.fitBounds(points, { padding: [40, 40] });
+  }
+</script>
+
+<style is:global>
+  /* Leaflet popup — civic style */
+  .leaflet-popup-content-wrapper {
+    border-radius: 10px;
+    box-shadow: 0 12px 40px rgba(15, 23, 41, 0.18);
+  }
+  .leaflet-popup-content {
+    margin: 0.75rem 0.9rem;
+    font-family: var(--font-sans);
+  }
+  .map-popup strong {
+    font-weight: 700;
+    color: #0f1729;
+  }
+  .map-popup span {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: #6b7686;
+  }
+  .map-popup a {
+    display: block;
+    margin-top: 0.35rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #0e4fc0;
+  }
+  .leaflet-container {
+    font-family: var(--font-sans);
+  }
+</style>

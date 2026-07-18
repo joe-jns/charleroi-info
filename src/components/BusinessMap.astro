@@ -1,0 +1,52 @@
+---
+interface Props {
+  lat: number;
+  lng: number;
+  name: string;
+}
+const { lat, lng, name } = Astro.props;
+---
+
+<div
+  class="w-full overflow-hidden rounded-[10px] border border-border"
+  style="height:220px"
+  data-business-map
+  data-lat={lat}
+  data-lng={lng}
+  data-name={name}
+>
+</div>
+
+<script>
+  import L from 'leaflet';
+  import 'leaflet/dist/leaflet.css';
+
+  const el = document.querySelector<HTMLElement>('[data-business-map]');
+  if (el) {
+    const lat = Number(el.dataset.lat);
+    const lng = Number(el.dataset.lng);
+    const name = el.dataset.name ?? '';
+
+    const map = L.map(el, {
+      scrollWheelZoom: false,
+      zoomControl: true,
+      dragging: true,
+    }).setView([lat, lng], 15);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      subdomains: 'abcd',
+      maxZoom: 19,
+      attribution: '© OpenStreetMap · © CARTO',
+    }).addTo(map);
+
+    L.circleMarker([lat, lng], {
+      radius: 9,
+      color: '#0e4fc0',
+      weight: 2,
+      fillColor: '#0e4fc0',
+      fillOpacity: 0.6,
+    })
+      .addTo(map)
+      .bindTooltip(name, { permanent: false, direction: 'top', offset: [0, -6] });
+  }
+</script>

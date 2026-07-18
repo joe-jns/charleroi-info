@@ -1,0 +1,96 @@
+---
+import { Icon } from 'astro-icon/components';
+
+const nav = [
+  { label: 'Annuaire', href: '/annuaire' },
+  { label: 'Emploi', href: '/emploi' },
+  { label: 'Événements', href: '/evenements' },
+  { label: 'Deals', href: '/deals' },
+  { label: 'Annonces', href: '/annonces' },
+  { label: 'Pratique', href: '/pratique' },
+];
+---
+
+<header class="sticky top-0 z-40 border-b border-border bg-surface/85 backdrop-blur-md">
+  <div class="u-container flex h-[68px] items-center justify-between gap-4">
+    <!-- Brand -->
+    <a href={import.meta.env.BASE_URL} class="flex items-center gap-2.5 shrink-0" aria-label="charleroi.info — accueil">
+      <span class="grid size-9 place-items-center rounded-[8px] bg-accent text-accent-ink">
+        <Icon name="ph:map-trifold-bold" class="size-5" />
+      </span>
+      <span class="text-[1.15rem] font-extrabold lowercase tracking-tight leading-none">
+        charleroi<span class="text-accent">.info</span>
+      </span>
+    </a>
+
+    <!-- Desktop nav -->
+    <nav class="hidden lg:flex items-center gap-1" aria-label="Navigation principale">
+      {nav.map((item) => (
+        <a
+          href={item.href}
+          class="rounded-[8px] px-3 py-2 text-[0.9rem] font-medium text-ink-soft transition-colors hover:bg-surface-muted hover:text-ink"
+        >
+          {item.label}
+        </a>
+      ))}
+    </nav>
+
+    <!-- Actions -->
+    <div class="flex items-center gap-2">
+      <a href={`${import.meta.env.BASE_URL}ajouter`} class="btn btn-ghost hidden sm:inline-flex">
+        <Icon name="ph:plus-bold" class="size-4" />
+        Ajouter mon entreprise
+      </a>
+
+      <!-- Mobile menu button -->
+      <button
+        id="menu-toggle"
+        type="button"
+        class="grid size-9 place-items-center rounded-[8px] border border-border text-ink lg:hidden"
+        aria-label="Ouvrir le menu"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+      >
+        <Icon name="ph:list-bold" class="size-5 menu-icon-open" />
+        <Icon name="ph:x-bold" class="size-5 menu-icon-close hidden" />
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile menu -->
+  <nav
+    id="mobile-menu"
+    class="hidden border-t border-border bg-surface lg:hidden"
+    aria-label="Navigation mobile"
+  >
+    <div class="u-container flex flex-col py-2">
+      {nav.map((item) => (
+        <a
+          href={item.href}
+          class="rounded-[8px] px-3 py-3 text-[0.95rem] font-medium text-ink-soft transition-colors hover:bg-surface-muted hover:text-ink"
+        >
+          {item.label}
+        </a>
+      ))}
+      <a href={`${import.meta.env.BASE_URL}ajouter`} class="btn btn-primary mt-2">
+        <Icon name="ph:plus-bold" class="size-4" />
+        Ajouter mon entreprise
+      </a>
+    </div>
+  </nav>
+</header>
+
+<script>
+  // Mobile menu
+  const tglMenu = document.getElementById('menu-toggle');
+  const menu = document.getElementById('mobile-menu');
+  const iconOpen = document.querySelector('.menu-icon-open');
+  const iconClose = document.querySelector('.menu-icon-close');
+
+  tglMenu?.addEventListener('click', () => {
+    const open = menu?.classList.toggle('hidden') === false;
+    tglMenu.setAttribute('aria-expanded', String(open));
+    iconOpen?.classList.toggle('hidden', open);
+    iconClose?.classList.toggle('hidden', !open);
+  });
+</script>

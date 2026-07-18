@@ -1,0 +1,128 @@
+---
+import { Icon } from 'astro-icon/components';
+import { categories } from '../data/categories';
+import { communes } from '../data/communes';
+
+const topCategories = categories.slice(0, 6);
+const topCommunes = communes.slice(0, 6);
+
+const vieLocale = [
+  { label: 'Offres d’emploi', href: '/emploi' },
+  { label: 'Événements', href: '/evenements' },
+  { label: 'Calendrier', href: '/calendrier' },
+  { label: 'Bons plans', href: '/deals' },
+  { label: 'Petites annonces', href: '/annonces' },
+  { label: 'Actualités', href: '/actualites' },
+];
+
+const leSite = [
+  { label: 'Ajouter mon entreprise', href: '/ajouter' },
+  { label: 'Infos pratiques', href: '/pratique' },
+  { label: 'Carte de la métropole', href: '/carte' },
+  { label: 'À propos', href: '/a-propos' },
+  { label: 'Contact', href: '/contact' },
+];
+
+const year = 2026;
+---
+
+<footer class="bg-[#0f1729] text-white/70">
+  <div class="u-container py-14 lg:py-16">
+    <div class="grid grid-cols-2 gap-x-8 gap-y-10 md:grid-cols-3 lg:grid-cols-6">
+      <!-- Brand -->
+      <div class="col-span-2 lg:col-span-2">
+        <a href={import.meta.env.BASE_URL} class="flex items-center gap-2.5" aria-label="charleroi.info — accueil">
+          <span class="grid size-9 place-items-center rounded-[8px] bg-accent text-white">
+            <Icon name="ph:map-trifold-bold" class="size-5" />
+          </span>
+          <span class="text-[1.15rem] font-extrabold lowercase tracking-tight text-white">
+            charleroi<span class="text-accent-tint">.info</span>
+          </span>
+        </a>
+        <p class="mt-4 max-w-[38ch] text-sm leading-relaxed text-white/60">
+          L’annuaire indépendant de Charleroi Métropole : commerces, services,
+          emploi et vie locale de toutes les communes.
+        </p>
+        <div class="mt-5 flex gap-2">
+          {[
+            { icon: 'ph:facebook-logo-bold', label: 'Facebook', href: '#' },
+            { icon: 'ph:instagram-logo-bold', label: 'Instagram', href: '#' },
+            { icon: 'ph:linkedin-logo-bold', label: 'LinkedIn', href: '#' },
+          ].map((s) => (
+            <a
+              href={s.href}
+              aria-label={s.label}
+              class="grid size-9 place-items-center rounded-[8px] border border-white/15 text-white/70 transition-colors hover:border-white/30 hover:bg-white/5 hover:text-white"
+            >
+              <Icon name={s.icon} class="size-[1.1rem]" />
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <!-- Annuaire -->
+      <div>
+        <h3 class="text-sm font-bold uppercase tracking-wider text-white">Annuaire</h3>
+        <ul class="mt-4 space-y-2.5 text-sm">
+          {topCategories.map((c) => (
+            <li>
+              <a href={`${import.meta.env.BASE_URL}annuaire/${c.slug}`} class="transition-colors hover:text-white">{c.name}</a>
+            </li>
+          ))}
+          <li>
+            <a href={`${import.meta.env.BASE_URL}annuaire`} class="font-semibold text-accent-tint transition-colors hover:text-white">Toutes les catégories →</a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Vie locale -->
+      <div>
+        <h3 class="text-sm font-bold uppercase tracking-wider text-white">Vie locale</h3>
+        <ul class="mt-4 space-y-2.5 text-sm">
+          {vieLocale.map((l) => (
+            <li>
+              <a href={l.href} class="transition-colors hover:text-white">{l.label}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Communes -->
+      <div>
+        <h3 class="text-sm font-bold uppercase tracking-wider text-white">Communes</h3>
+        <ul class="mt-4 space-y-2.5 text-sm">
+          {topCommunes.map((c) => (
+            <li>
+              <a href={`${import.meta.env.BASE_URL}${c.slug}`} class="transition-colors hover:text-white">{c.name}</a>
+            </li>
+          ))}
+          <li>
+            <a href={`${import.meta.env.BASE_URL}carte`} class="font-semibold text-accent-tint transition-colors hover:text-white">Toutes les communes →</a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Le site -->
+      <div>
+        <h3 class="text-sm font-bold uppercase tracking-wider text-white">Le site</h3>
+        <ul class="mt-4 space-y-2.5 text-sm">
+          {leSite.map((l) => (
+            <li>
+              <a href={l.href} class="transition-colors hover:text-white">{l.label}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="mt-12 flex flex-col gap-4 border-t border-white/10 pt-6 text-xs text-white/50 md:flex-row md:items-center md:justify-between">
+      <p>© {year} charleroi.info · Annuaire indépendant de la métropole carolo.</p>
+      <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
+        <a href={`${import.meta.env.BASE_URL}mentions-legales`} class="transition-colors hover:text-white/80">Mentions légales</a>
+        <a href={`${import.meta.env.BASE_URL}confidentialite`} class="transition-colors hover:text-white/80">Confidentialité</a>
+        <span class="text-white/40">Photo Hôtel de Ville : Jmh2o, CC BY-SA 4.0</span>
+      </div>
+    </div>
+  </div>
+</footer>

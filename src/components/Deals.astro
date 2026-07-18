@@ -1,0 +1,105 @@
+---
+import { Icon } from 'astro-icon/components';
+import { deals } from '../data/deals';
+
+// Dupliqué pour une boucle sans couture.
+const loop = [...deals, ...deals];
+---
+
+<section class="overflow-hidden border-b border-border bg-surface py-16 lg:py-20">
+  <div class="u-container flex items-end justify-between gap-6">
+    <div>
+      <span class="section-mark"></span>
+      <h2 class="text-2xl font-extrabold tracking-tight sm:text-3xl">Bons plans du moment</h2>
+      <p class="mt-2 max-w-[52ch] text-ink-soft">
+        Les offres en cours chez les commerçants de la métropole.
+      </p>
+    </div>
+
+    <a
+      href={`${import.meta.env.BASE_URL}deals`}
+      class="hidden shrink-0 items-center gap-1.5 text-[0.9rem] font-semibold text-accent transition-colors hover:text-accent-hover sm:inline-flex"
+    >
+      Tous les deals
+      <Icon name="ph:arrow-right-bold" class="size-4" />
+    </a>
+  </div>
+
+  <div class="marquee relative mt-8">
+    <div class="marquee__track flex w-max gap-5" aria-label="Offres en cours">
+      {loop.map((d, i) => (
+        <a
+          href={`${import.meta.env.BASE_URL}deals/${d.slug}`}
+          aria-hidden={i >= deals.length ? 'true' : undefined}
+          tabindex={i >= deals.length ? -1 : undefined}
+          class="group flex w-[300px] shrink-0 flex-col overflow-hidden rounded-[12px] border border-border bg-surface transition-all duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-[0_12px_30px_rgba(15,23,41,0.08)]"
+        >
+          <div class="relative aspect-[16/10] overflow-hidden bg-surface-muted">
+            {/* TODO: remplacer par la vraie photo de l'offre */}
+            <img
+              src={`https://picsum.photos/seed/${d.imageSeed}/720/450`}
+              alt={d.title}
+              loading="lazy"
+              class="size-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+            />
+            <span class="absolute left-3 top-3 inline-flex items-center rounded-[8px] bg-accent px-2.5 py-1 text-sm font-extrabold text-accent-ink shadow-[0_4px_12px_rgba(14,79,192,0.35)]">
+              {d.discount}
+            </span>
+          </div>
+
+          <div class="flex flex-1 flex-col p-4">
+            <p class="text-xs font-medium text-ink-faint">{d.category} · {d.commune}</p>
+            <h3 class="mt-1 text-[1.05rem] font-bold leading-snug text-ink transition-colors group-hover:text-accent">
+              {d.title}
+            </h3>
+            <p class="mt-0.5 text-sm font-medium text-ink-faint">{d.business}</p>
+            <p class="mt-1.5 line-clamp-2 text-sm leading-relaxed text-ink-soft">{d.blurb}</p>
+
+            <div class="mt-auto flex items-center justify-between gap-2 pt-4">
+              <span class="inline-flex items-center gap-1 text-xs text-ink-faint">
+                <Icon name="ph:clock-bold" class="size-3.5" />
+                Jusqu’au {d.validUntil}
+              </span>
+              <span class="inline-flex items-center gap-1 text-sm font-semibold text-accent">
+                Voir l’offre
+                <Icon name="ph:caret-right-bold" class="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+              </span>
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+
+    <!-- Fondus sur les bords -->
+    <div class="pointer-events-none absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-surface to-transparent sm:w-24"></div>
+    <div class="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-surface to-transparent sm:w-24"></div>
+  </div>
+
+  <a
+    href={`${import.meta.env.BASE_URL}deals`}
+    class="u-container mt-6 inline-flex items-center gap-1.5 text-[0.9rem] font-semibold text-accent transition-colors hover:text-accent-hover sm:hidden"
+  >
+    Tous les deals
+    <Icon name="ph:arrow-right-bold" class="size-4" />
+  </a>
+</section>
+
+<style>
+  .marquee__track {
+    animation: deal-marquee 55s linear infinite;
+    will-change: transform;
+  }
+  /* Pause au survol pour laisser lire / cliquer */
+  .marquee:hover .marquee__track {
+    animation-play-state: paused;
+  }
+  @keyframes deal-marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .marquee__track {
+      animation: none;
+    }
+  }
+</style>

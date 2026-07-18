@@ -1,0 +1,416 @@
+---
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import BusinessMap from '../../components/BusinessMap.astro';
+import { Icon } from 'astro-icon/components';
+import { businesses, type Business } from '../../data/businesses';
+import { latestJobs } from '../../data/jobs';
+import { upcomingEvents } from '../../data/events';
+
+export function getStaticPaths() {
+  return businesses.map((b) => ({ params: { slug: b.slug }, props: { business: b } }));
+}
+
+const { business } = Astro.props as { business: Business };
+const b = business;
+const claimed = b.claimed === true;
+
+const bizJobs = latestJobs.filter((j) => j.businessSlug === b.slug);
+const bizEvents = upcomingEvents.filter((e) => e.businessSlug === b.slug);
+
+const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(b.address)}`;
+const initials = (name: string) =>
+  name.split(' ').slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+
+// Établissements similaires (même catégorie), complétés par d'autres si besoin.
+const similar = [
+  ...businesses.filter((x) => x.categorySlug === b.categorySlug && x.slug !== b.slug),
+  ...businesses.filter((x) => x.categorySlug !== b.categorySlug && x.slug !== b.slug),
+].slice(0, 3);
+---
+
+<Base title={`${b.name} — ${b.commune} · charleroi.info`} description={b.blurb}>
+  <Header />
+
+  <main id="contenu" class="bg-surface-muted pb-20">
+    <!-- Breadcrumb -->
+    <nav aria-label="Fil d’Ariane" class="border-b border-border bg-surface">
+      <div class="u-container flex items-center gap-1.5 py-3 text-sm text-ink-faint">
+        <a href={import.meta.env.BASE_URL} class="transition-colors hover:text-accent">Accueil</a>
+        <Icon name="ph:caret-right-bold" class="size-3" />
+        <a href={`${import.meta.env.BASE_URL}annuaire`} class="transition-colors hover:text-accent">Annuaire</a>
+        <Icon name="ph:caret-right-bold" class="size-3" />
+        <a href={`${import.meta.env.BASE_URL}annuaire/${b.categorySlug}`} class="transition-colors hover:text-accent">{b.category}</a>
+        <Icon name="ph:caret-right-bold" class="size-3" />
+        <span class="truncate text-ink">{b.name}</span>
+      </div>
+    </nav>
+
+    <!-- Cover -->
+    <div class="u-container pt-6">
+      <div class="relative overflow-hidden rounded-[14px] border border-border">
+        {/* TODO: vraie photo de couverture de l'établissement */}
+        <img
+          src={`https://picsum.photos/seed/${b.imageSeed}/1600/600`}
+          alt={b.name}
+          class="h-52 w-full object-cover sm:h-64 lg:h-80"
+          loading="eager"
+        />
+        <span
+          class="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-surface/95 px-3 py-1.5 text-sm font-semibold shadow-sm backdrop-blur-sm"
+        >
+          <span class="size-2 rounded-full" style={`background:${b.openNow ? '#16a34a' : '#9ca3af'}`}></span>
+          {b.openNow ? 'Ouvert' : 'Fermé'}
+        </span>
+      </div>
+    </div>
+
+    <!-- Header block -->
+    <div class="u-container mt-8">
+      <div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p class="text-sm font-medium text-ink-faint">{b.category} · {b.commune}</p>
+          <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-2">
+            <h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl">{b.name}</h1>
+            {claimed && (
+              <span class="inline-flex items-center gap-1 rounded-full bg-accent-tint px-2.5 py-1 text-xs font-semibold text-accent" title="Fiche revendiquée par le propriétaire">
+                <Icon name="ph:seal-check-fill" class="size-4" />
+                Vérifié
+              </span>
+            )}
+          </div>
+          <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm">
+            <span class="flex items-center gap-1.5">
+              <span class="flex items-center gap-0.5">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Icon name={i < Math.round(b.rating) ? 'ph:star-fill' : 'ph:star'} class="size-4 text-amber-500" />
+                ))}
+              </span>
+              <span class="font-semibold text-ink">{b.rating.toFixed(1)}</span>
+              <span class="text-ink-faint">({b.reviews} avis)</span>
+            </span>
+            <span class="text-ink-faint">·</span>
+            <span class="text-ink-soft">{b.priceLevel}</span>
+            <span class="text-ink-faint">·</span>
+            <span class="flex items-center gap-1 text-ink-soft">
+              <Icon name="ph:map-pin-bold" class="size-4 text-ink-faint" />
+              {b.commune}
+            </span>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2.5">
+          <a href={`tel:${b.phone.replace(/\s/g, '')}`} class="btn btn-primary">
+            <Icon name="ph:phone-bold" class="size-4" />
+            Appeler
+          </a>
+          <a href={mapsUrl} target="_blank" rel="noopener" class="btn btn-ghost">
+            <Icon name="ph:navigation-arrow-bold" class="size-4" />
+            Itinéraire
+          </a>
+          <a href={`https://${b.website}`} target="_blank" rel="noopener" class="btn btn-ghost">
+            <Icon name="ph:globe-bold" class="size-4" />
+            Site web
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="u-container mt-12 grid gap-10 lg:mt-14 lg:grid-cols-3">
+      <!-- Left -->
+      <div class="lg:col-span-2">
+        <!-- Tabs -->
+        <div role="tablist" class="no-scrollbar flex gap-1 overflow-x-auto border-b border-border" data-tabs>
+          <button role="tab" data-tab="apercu" aria-selected="true" class="-mb-px flex shrink-0 items-center gap-2 border-b-2 border-transparent px-4 py-3 text-sm font-semibold text-ink-soft transition-colors hover:text-ink aria-selected:border-accent aria-selected:text-accent">
+            Présentation
+          </button>
+          <button role="tab" data-tab="emploi" aria-selected="false" class="-mb-px flex shrink-0 items-center gap-2 border-b-2 border-transparent px-4 py-3 text-sm font-semibold text-ink-soft transition-colors hover:text-ink aria-selected:border-accent aria-selected:text-accent">
+            Offres d’emploi
+            {bizJobs.length > 0 && <span class="rounded-full bg-surface-sunken px-1.5 py-0.5 text-xs text-ink-soft">{bizJobs.length}</span>}
+          </button>
+          <button role="tab" data-tab="evenements" aria-selected="false" class="-mb-px flex shrink-0 items-center gap-2 border-b-2 border-transparent px-4 py-3 text-sm font-semibold text-ink-soft transition-colors hover:text-ink aria-selected:border-accent aria-selected:text-accent">
+            Événements
+            {bizEvents.length > 0 && <span class="rounded-full bg-surface-sunken px-1.5 py-0.5 text-xs text-ink-soft">{bizEvents.length}</span>}
+          </button>
+        </div>
+
+        <!-- Panel: Présentation -->
+        <div data-panel="apercu" class="space-y-12 pt-8">
+        <!-- À propos -->
+        <section>
+          <h2 class="text-xl font-extrabold tracking-tight">À propos</h2>
+          <p class="mt-3 max-w-[68ch] leading-relaxed text-ink-soft">{b.description}</p>
+        </section>
+
+        <!-- Prestations -->
+        <section>
+          <h2 class="text-xl font-extrabold tracking-tight">Prestations & services</h2>
+          <div class="mt-4 flex flex-wrap gap-2">
+            {b.services.map((s) => (
+              <span class="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3.5 py-1.5 text-sm font-medium text-ink-soft">
+                <Icon name="ph:check-bold" class="size-3.5 text-accent" />
+                {s}
+              </span>
+            ))}
+          </div>
+        </section>
+
+        <!-- Galerie -->
+        <section>
+          <h2 class="text-xl font-extrabold tracking-tight">Photos</h2>
+          <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {b.gallery.map((seed) => (
+              <div class="aspect-[4/3] overflow-hidden rounded-[10px] border border-border bg-surface-muted">
+                {/* TODO: vraies photos de l'établissement */}
+                <img
+                  src={`https://picsum.photos/seed/${seed}/600/450`}
+                  alt={`${b.name} — photo`}
+                  loading="lazy"
+                  class="size-full object-cover transition-transform duration-500 hover:scale-[1.04]"
+                />
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <!-- Avis -->
+        <section>
+          <div class="flex items-end justify-between gap-4">
+            <h2 class="text-xl font-extrabold tracking-tight">Avis</h2>
+            <button type="button" class="btn btn-ghost text-sm">
+              <Icon name="ph:pencil-simple-bold" class="size-4" />
+              Laisser un avis
+            </button>
+          </div>
+
+          <div class="mt-4 flex items-center gap-5 rounded-[12px] border border-border bg-surface p-5">
+            <div class="text-center">
+              <p class="font-display text-4xl font-extrabold leading-none">{b.rating.toFixed(1)}</p>
+              <div class="mt-1.5 flex items-center gap-0.5">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Icon name={i < Math.round(b.rating) ? 'ph:star-fill' : 'ph:star'} class="size-3.5 text-amber-500" />
+                ))}
+              </div>
+            </div>
+            <div class="h-12 w-px bg-border"></div>
+            <p class="text-sm text-ink-soft">
+              Basé sur <span class="font-semibold text-ink">{b.reviews} avis</span> de clients
+              vérifiés sur charleroi.info.
+            </p>
+          </div>
+
+          <ul class="mt-5 space-y-4">
+            {b.reviewList.map((r) => (
+              <li class="rounded-[12px] border border-border bg-surface p-5">
+                <div class="flex items-center gap-3">
+                  <span class="grid size-10 shrink-0 place-items-center rounded-full bg-accent-tint text-sm font-bold text-accent">
+                    {initials(r.author)}
+                  </span>
+                  <div>
+                    <p class="font-semibold text-ink">{r.author}</p>
+                    <div class="mt-0.5 flex items-center gap-2">
+                      <span class="flex items-center gap-0.5">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Icon name={i < r.rating ? 'ph:star-fill' : 'ph:star'} class="size-3 text-amber-500" />
+                        ))}
+                      </span>
+                      <span class="text-xs text-ink-faint">{r.when}</span>
+                    </div>
+                  </div>
+                </div>
+                <p class="mt-3 leading-relaxed text-ink-soft">{r.text}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+        </div>
+
+        <!-- Panel: Offres d'emploi -->
+        <div data-panel="emploi" hidden class="pt-8">
+          <h2 class="text-xl font-extrabold tracking-tight">Offres d’emploi</h2>
+          {bizJobs.length > 0 ? (
+            <div class="mt-5 divide-y divide-border overflow-hidden rounded-[12px] border border-border bg-surface">
+              {bizJobs.map((j) => (
+                <a href={`${import.meta.env.BASE_URL}emploi/${j.slug}`} class="group flex items-center gap-4 p-4">
+                  <span class="grid size-10 shrink-0 place-items-center rounded-[8px] bg-accent-tint text-accent">
+                    <Icon name="ph:briefcase-bold" class="size-5" />
+                  </span>
+                  <div class="min-w-0 flex-1">
+                    <h3 class="font-semibold text-ink transition-colors group-hover:text-accent">{j.title}</h3>
+                    <p class="mt-0.5 text-sm text-ink-soft">{j.contract} · {j.sector} · {j.commune}</p>
+                  </div>
+                  <div class="flex shrink-0 items-center gap-2">
+                    <span class="hidden text-xs text-ink-faint sm:inline">{j.posted}</span>
+                    <Icon name="ph:caret-right-bold" class="size-4 text-ink-faint transition-transform group-hover:translate-x-0.5 group-hover:text-accent" />
+                  </div>
+                </a>
+              ))}
+            </div>
+          ) : (
+            <div class="mt-5 rounded-[12px] border border-dashed border-border bg-surface p-10 text-center">
+              <Icon name="ph:briefcase-bold" class="mx-auto size-8 text-ink-faint" />
+              <p class="mt-3 font-semibold text-ink">Aucune offre pour le moment</p>
+              <p class="mt-1 text-sm text-ink-soft">Cet établissement n’a pas d’offre d’emploi en cours.</p>
+            </div>
+          )}
+        </div>
+
+        <!-- Panel: Événements -->
+        <div data-panel="evenements" hidden class="pt-8">
+          <h2 class="text-xl font-extrabold tracking-tight">Événements</h2>
+          {bizEvents.length > 0 ? (
+            <div class="mt-5 divide-y divide-border overflow-hidden rounded-[12px] border border-border bg-surface">
+              {bizEvents.map((e) => (
+                <a href={`${import.meta.env.BASE_URL}evenements/${e.slug}`} class="group flex items-center gap-4 p-4">
+                  <div class="grid size-14 shrink-0 place-items-center rounded-[8px] border border-border bg-surface-muted leading-none">
+                    <span class="text-lg font-extrabold text-ink">{e.day}</span>
+                    <span class="mt-0.5 font-mono text-[0.65rem] font-semibold tracking-wider text-accent">{e.month}</span>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <h3 class="font-semibold text-ink transition-colors group-hover:text-accent">{e.title}</h3>
+                    <p class="mt-1 flex items-center gap-1 text-sm text-ink-soft">
+                      <Icon name="ph:clock-bold" class="size-3.5" />
+                      {e.time}
+                      <span class="mx-1">·</span>
+                      {e.category}
+                    </p>
+                  </div>
+                  <Icon name="ph:caret-right-bold" class="size-4 shrink-0 text-ink-faint transition-transform group-hover:translate-x-0.5 group-hover:text-accent" />
+                </a>
+              ))}
+            </div>
+          ) : (
+            <div class="mt-5 rounded-[12px] border border-dashed border-border bg-surface p-10 text-center">
+              <Icon name="ph:calendar-dots-bold" class="mx-auto size-8 text-ink-faint" />
+              <p class="mt-3 font-semibold text-ink">Aucun événement à venir</p>
+              <p class="mt-1 text-sm text-ink-soft">Cet établissement n’a pas d’événement programmé.</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="space-y-6 lg:sticky lg:top-24 lg:self-start">
+        <!-- Coordonnées -->
+        <div class="rounded-[12px] border border-border bg-surface p-5">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-ink-faint">Coordonnées</h2>
+          <ul class="mt-4 space-y-3.5 text-sm">
+            <li class="flex gap-3">
+              <Icon name="ph:map-pin-bold" class="mt-0.5 size-5 shrink-0 text-accent" />
+              <span class="text-ink-soft">{b.address}</span>
+            </li>
+            <li class="flex gap-3">
+              <Icon name="ph:phone-bold" class="mt-0.5 size-5 shrink-0 text-accent" />
+              <a href={`tel:${b.phone.replace(/\s/g, '')}`} class="text-ink transition-colors hover:text-accent">{b.phone}</a>
+            </li>
+            <li class="flex gap-3">
+              <Icon name="ph:globe-bold" class="mt-0.5 size-5 shrink-0 text-accent" />
+              <a href={`https://${b.website}`} target="_blank" rel="noopener" class="text-ink transition-colors hover:text-accent">{b.website}</a>
+            </li>
+          </ul>
+          <a href={mapsUrl} target="_blank" rel="noopener" class="btn btn-ghost mt-4 w-full">
+            <Icon name="ph:navigation-arrow-bold" class="size-4" />
+            Obtenir l’itinéraire
+          </a>
+        </div>
+
+        <!-- Horaires -->
+        <div class="rounded-[12px] border border-border bg-surface p-5">
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-bold uppercase tracking-wider text-ink-faint">Horaires</h2>
+            <span class="inline-flex items-center gap-1.5 text-xs font-semibold">
+              <span class="size-1.5 rounded-full" style={`background:${b.openNow ? '#16a34a' : '#9ca3af'}`}></span>
+              {b.openNow ? 'Ouvert' : 'Fermé'}
+            </span>
+          </div>
+          <ul class="mt-4 space-y-2 text-sm" data-hours>
+            {b.hours.map((h, i) => (
+              <li class="flex justify-between gap-4 rounded-[6px] px-2 py-1" data-day-index={i}>
+                <span class="text-ink-soft">{h.day}</span>
+                <span class={h.range === 'Fermé' ? 'text-ink-faint' : 'font-medium text-ink'}>{h.range}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <!-- Carte -->
+        <div class="rounded-[12px] border border-border bg-surface p-2">
+          <BusinessMap lat={b.lat} lng={b.lng} name={b.name} />
+        </div>
+
+        <!-- Revendication -->
+        {claimed ? (
+          <p class="flex items-center gap-2 px-1 text-xs text-ink-faint">
+            <Icon name="ph:seal-check-fill" class="size-4 text-accent" />
+            Fiche gérée par le propriétaire.
+          </p>
+        ) : (
+          <div class="rounded-[12px] border border-dashed border-border-strong bg-surface p-5">
+            <div class="flex items-center gap-2">
+              <Icon name="ph:storefront-bold" class="size-5 text-accent" />
+              <h2 class="font-bold tracking-tight text-ink">Est-ce votre établissement ?</h2>
+            </div>
+            <p class="mt-2 text-sm leading-relaxed text-ink-soft">
+              Revendiquez cette fiche gratuitement pour gérer vos informations,
+              horaires et photos, et répondre aux avis.
+            </p>
+            <a href={`${import.meta.env.BASE_URL}revendiquer?fiche=${b.slug}`} class="btn btn-primary mt-4 w-full">
+              <Icon name="ph:seal-check-bold" class="size-4" />
+              Revendiquer cette fiche
+            </a>
+          </div>
+        )}
+      </aside>
+    </div>
+
+    <!-- Similaires -->
+    {similar.length > 0 && (
+      <div class="u-container mt-16 border-t border-border pt-14 lg:mt-20 lg:pt-16">
+        <span class="section-mark"></span>
+        <h2 class="text-xl font-extrabold tracking-tight">Établissements similaires</h2>
+        <div class="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {similar.map((s) => (
+            <a
+              href={`${import.meta.env.BASE_URL}business/${s.slug}`}
+              class="group flex flex-col overflow-hidden rounded-[12px] border border-border bg-surface transition-all duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-[0_12px_30px_rgba(15,23,41,0.08)]"
+            >
+              <div class="aspect-[16/10] overflow-hidden bg-surface-muted">
+                <img src={`https://picsum.photos/seed/${s.imageSeed}/720/450`} alt={s.name} loading="lazy" class="size-full object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
+              </div>
+              <div class="flex flex-1 flex-col p-4">
+                <p class="text-xs font-medium text-ink-faint">{s.category} · {s.commune}</p>
+                <h3 class="mt-1 font-bold leading-snug text-ink transition-colors group-hover:text-accent">{s.name}</h3>
+                <div class="mt-auto flex items-center gap-1.5 pt-3 text-sm">
+                  <Icon name="ph:star-fill" class="size-3.5 text-amber-500" />
+                  <span class="font-semibold text-ink">{s.rating.toFixed(1)}</span>
+                  <span class="text-ink-faint">· {s.reviews} avis</span>
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
+  </main>
+
+  <Footer />
+</Base>
+
+<script>
+  // Met en évidence la ligne du jour dans les horaires.
+  const todayIndex = (new Date().getDay() + 6) % 7; // 0 = Lundi
+  document.querySelector(`[data-hours] [data-day-index="${todayIndex}"]`)?.classList.add('bg-accent-tint');
+
+  // Onglets de la fiche (Présentation / Emploi / Événements).
+  const tabs = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-tabs] [role="tab"]'));
+  const panels = Array.from(document.querySelectorAll<HTMLElement>('[data-panel]'));
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const key = tab.dataset.tab;
+      tabs.forEach((t) => t.setAttribute('aria-selected', String(t === tab)));
+      panels.forEach((p) => { p.hidden = p.dataset.panel !== key; });
+    });
+  });
+</script>

@@ -1,0 +1,90 @@
+---
+import { Image } from 'astro:assets';
+import { Icon } from 'astro-icon/components';
+import { popularSearches } from '../data/categories';
+import CommuneSelect from './CommuneSelect.astro';
+import heroImg from '../assets/hero-charleroi.jpg';
+---
+
+<section class="relative isolate flex min-h-[600px] items-center border-b border-border lg:min-h-[78dvh]">
+  <!-- Hôtel de Ville de Charleroi (place Charles II). Photo Jmh2o, CC BY-SA 4.0. -->
+  <Image
+    src={heroImg}
+    alt=""
+    aria-hidden="true"
+    widths={[768, 1280, 1920, 2400]}
+    sizes="100vw"
+    class="absolute inset-0 -z-20 size-full object-cover object-center"
+    loading="eager"
+    fetchpriority="high"
+  />
+  <!-- Scrim for legibility -->
+  <div
+    aria-hidden="true"
+    class="absolute inset-0 -z-10"
+    style="background:linear-gradient(180deg,rgba(9,13,22,.72)0%,rgba(9,13,22,.58)42%,rgba(9,13,22,.78)100%);"
+  >
+  </div>
+
+  <div class="u-container relative w-full py-20 text-center">
+    <div class="mx-auto max-w-3xl">
+      <p class="font-mono text-xs uppercase tracking-[0.18em] text-white/70">
+        L’annuaire de Charleroi Métropole
+      </p>
+
+      <h1 class="mt-4 text-[2.5rem] font-extrabold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-[3.75rem]">
+        Trouvez tout Charleroi.
+      </h1>
+
+      <p class="mx-auto mt-5 max-w-[42ch] text-lg leading-relaxed text-white/85">
+        Commerces, services, emploi et vie locale de la ville et de toutes les
+        communes. Une seule recherche.
+      </p>
+
+      <!-- Search module (fixed light surface over photo) -->
+      <form
+        action="/recherche"
+        method="get"
+        class="mx-auto mt-8 max-w-4xl rounded-[12px] bg-white p-2 text-left shadow-[0_18px_50px_rgba(9,13,22,0.35)] sm:flex sm:items-stretch sm:gap-2"
+      >
+        <div class="flex flex-1 items-center gap-2.5 px-3 py-2.5">
+          <Icon name="ph:magnifying-glass-bold" class="size-5 shrink-0 text-[#6b7686]" />
+          <label for="q" class="sr-only">Que cherchez-vous ?</label>
+          <input
+            id="q"
+            name="q"
+            type="search"
+            autocomplete="off"
+            placeholder="Restaurant, plombier, coiffeur…"
+            class="w-full bg-transparent text-[1rem] text-[#0f1729] outline-none placeholder:text-[#6b7686]"
+          />
+        </div>
+
+        <div class="my-1 hidden w-px bg-[#e2e6ec] sm:block"></div>
+
+        <CommuneSelect />
+
+        <button
+          type="submit"
+          class="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-[8px] bg-[#0e4fc0] px-5 py-3 text-[0.95rem] font-semibold text-white transition-colors hover:bg-[#0a3f9d] active:translate-y-px sm:mt-0 sm:w-auto"
+        >
+          <Icon name="ph:magnifying-glass-bold" class="size-4" />
+          Rechercher
+        </button>
+      </form>
+
+      <!-- Quick searches -->
+      <div class="mt-6 flex flex-wrap items-center justify-center gap-2">
+        <span class="mr-1 text-sm text-white/65">Populaire&nbsp;:</span>
+        {popularSearches.map((s) => (
+          <a
+            href={`${import.meta.env.BASE_URL}recherche?q=${s.q}`}
+            class="inline-flex items-center rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-sm font-medium text-white backdrop-blur-sm transition-colors hover:border-white/40 hover:bg-white/20"
+          >
+            {s.label}
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>

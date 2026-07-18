@@ -1,0 +1,55 @@
+---
+import { Icon } from 'astro-icon/components';
+---
+
+<section class="relative overflow-hidden bg-[#0f1729] text-white">
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute inset-0 opacity-25"
+    style="background-image:radial-gradient(circle at 88% 10%,#6f9bff,transparent 42%);"
+  >
+  </div>
+
+  <div class="u-container relative grid items-center gap-8 py-14 lg:grid-cols-2 lg:gap-12 lg:py-16">
+    <!-- Offre -->
+    <div>
+      <span class="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white/80">
+        <Icon name="ph:tag-bold" class="size-3.5" />
+        Offre newsletter
+      </span>
+      <h2 class="mt-4 text-2xl font-extrabold tracking-tight sm:text-3xl">
+        Restez connecté à la métropole
+      </h2>
+      <p class="mt-2 max-w-[48ch] text-white/70">
+        Les nouveautés, événements et bons plans de Charleroi chaque semaine.
+        En prime, <span class="font-semibold text-white">-10% sur tous les plans pro</span> à l’inscription.
+      </p>
+    </div>
+
+    <!-- Formulaire -->
+    <div class="lg:justify-self-end lg:pl-8">
+      <form action="/newsletter" method="post" class="flex w-full flex-col gap-2.5 sm:flex-row lg:w-auto">
+        <label for="newsletter-email" class="sr-only">Adresse e-mail</label>
+        <input
+          id="newsletter-email"
+          name="email"
+          type="email"
+          required
+          autocomplete="email"
+          placeholder="Votre adresse e-mail"
+          class="w-full rounded-[8px] border border-white/20 bg-white/5 px-4 py-3 text-[0.95rem] text-white outline-none transition-colors placeholder:text-white/45 focus:border-white/50 sm:w-72"
+        />
+        <button
+          type="submit"
+          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-[8px] bg-white px-5 py-3 text-[0.95rem] font-semibold text-[#0f1729] transition-colors hover:bg-white/90 active:translate-y-px"
+        >
+          <Icon name="ph:paper-plane-tilt-bold" class="size-4" />
+          S’inscrire
+        </button>
+      </form>
+      <p class="mt-3 text-xs text-white/50">
+        Pas de spam. Désinscription en un clic. Le code promo arrive par e-mail.
+      </p>
+    </div>
+  </div>
+</section>
