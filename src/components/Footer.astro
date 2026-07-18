@@ -81,7 +81,7 @@ const year = 2026;
         <ul class="mt-4 space-y-2.5 text-sm">
           {vieLocale.map((l) => (
             <li>
-              <a href={l.href} class="transition-colors hover:text-white">{l.label}</a>
+              <a href={`${import.meta.env.BASE_URL}${l.href.replace(/^\//, '')}`} class="transition-colors hover:text-white">{l.label}</a>
             </li>
           ))}
         </ul>
@@ -108,7 +108,7 @@ const year = 2026;
         <ul class="mt-4 space-y-2.5 text-sm">
           {leSite.map((l) => (
             <li>
-              <a href={l.href} class="transition-colors hover:text-white">{l.label}</a>
+              <a href={`${import.meta.env.BASE_URL}${l.href.replace(/^\//, '')}`} class="transition-colors hover:text-white">{l.label}</a>
             </li>
           ))}
         </ul>
