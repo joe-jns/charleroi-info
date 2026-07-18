@@ -1,0 +1,53 @@
+---
+import { Icon } from 'astro-icon/components';
+import type { Business } from '../data/businesses';
+
+interface Props {
+  business: Business;
+}
+const { business: b } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+
+<a
+  href={`${base}business/${b.slug}`}
+  class="group flex flex-col overflow-hidden rounded-[12px] border border-border bg-surface transition-all duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-[0_12px_30px_rgba(15,23,41,0.08)]"
+  data-card
+  data-name={`${b.name} ${b.category}`.toLowerCase()}
+  data-commune={b.commune}
+  data-open={b.openNow ? '1' : '0'}
+  data-rating={b.rating}
+  data-reviews={b.reviews}
+>
+  <div class="relative aspect-[16/10] overflow-hidden bg-surface-muted">
+    {/* TODO: vraie photo de l'établissement */}
+    <img
+      src={`https://picsum.photos/seed/${b.imageSeed}/720/450`}
+      alt={b.name}
+      loading="lazy"
+      class="size-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+    />
+    <span class="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-surface/95 px-2.5 py-1 text-xs font-semibold shadow-sm backdrop-blur-sm">
+      <span class="size-1.5 rounded-full" style={`background:${b.openNow ? '#16a34a' : '#9ca3af'}`}></span>
+      {b.openNow ? 'Ouvert' : 'Fermé'}
+    </span>
+  </div>
+
+  <div class="flex flex-1 flex-col p-4">
+    <p class="text-xs font-medium text-ink-faint">{b.category} · {b.commune}</p>
+    <h3 class="mt-1 text-[1.05rem] font-bold leading-snug text-ink transition-colors group-hover:text-accent">
+      {b.name}
+    </h3>
+    <p class="mt-1.5 line-clamp-2 text-sm leading-relaxed text-ink-soft">{b.blurb}</p>
+
+    <div class="mt-auto flex items-center gap-2 pt-4">
+      <div class="flex items-center gap-0.5">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Icon name={i < Math.round(b.rating) ? 'ph:star-fill' : 'ph:star'} class="size-3.5 text-amber-500" />
+        ))}
+      </div>
+      <span class="text-sm font-semibold text-ink">{b.rating.toFixed(1)}</span>
+      <span class="text-sm text-ink-faint">· {b.reviews} avis</span>
+    </div>
+  </div>
+</a>

@@ -1,0 +1,74 @@
+---
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import { Icon } from 'astro-icon/components';
+import { categories } from '../../data/categories';
+import { businesses } from '../../data/businesses';
+
+const base = import.meta.env.BASE_URL;
+const withCounts = categories.map((c) => ({
+  ...c,
+  count: businesses.filter((b) => b.categorySlug === c.slug).length,
+}));
+---
+
+<Base title="Annuaire de Charleroi Métropole · charleroi.info" description="Parcourez les commerces et services de Charleroi et de toutes les communes, secteur par secteur.">
+  <Header />
+
+  <main id="contenu" class="bg-surface-muted pb-20">
+    <!-- Breadcrumb -->
+    <nav aria-label="Fil d’Ariane" class="border-b border-border bg-surface">
+      <div class="u-container flex items-center gap-1.5 py-3 text-sm text-ink-faint">
+        <a href={base} class="transition-colors hover:text-accent">Accueil</a>
+        <Icon name="ph:caret-right-bold" class="size-3" />
+        <span class="text-ink">Annuaire</span>
+      </div>
+    </nav>
+
+    <!-- Title + search -->
+    <div class="border-b border-border bg-surface">
+      <div class="u-container py-10 lg:py-14">
+        <span class="section-mark"></span>
+        <h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl">Annuaire de la métropole</h1>
+        <p class="mt-2 max-w-[54ch] text-ink-soft">
+          Tous les commerces et services de Charleroi et des communes, classés par secteur.
+        </p>
+
+        <form action={`${base}recherche`} method="get" class="mt-6 flex max-w-xl items-center gap-2 rounded-[10px] border border-border-strong bg-surface p-1.5">
+          <div class="flex flex-1 items-center gap-2.5 px-3 py-2">
+            <Icon name="ph:magnifying-glass-bold" class="size-5 shrink-0 text-ink-faint" />
+            <label for="q" class="sr-only">Rechercher</label>
+            <input id="q" name="q" type="search" placeholder="Restaurant, plombier, coiffeur…" class="w-full bg-transparent text-[0.95rem] text-ink outline-none placeholder:text-ink-faint" />
+          </div>
+          <button type="submit" class="btn btn-primary">Rechercher</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Categories grid -->
+    <div class="u-container pt-8">
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {withCounts.map((c) => (
+          <a
+            href={`${base}annuaire/${c.slug}`}
+            class="group flex items-center gap-4 rounded-[12px] border border-border bg-surface p-5 transition-colors hover:border-accent-tint-2 hover:bg-accent-tint"
+          >
+            <span class="grid size-12 shrink-0 place-items-center rounded-[10px] bg-accent-tint text-accent transition-colors group-hover:bg-accent group-hover:text-accent-ink">
+              <Icon name={`ph:${c.icon}`} class="size-6" />
+            </span>
+            <div class="min-w-0 flex-1">
+              <h2 class="font-bold leading-tight text-ink transition-colors group-hover:text-accent">{c.name}</h2>
+              <p class="mt-0.5 text-sm text-ink-faint">
+                {c.count > 0 ? `${c.count} établissement${c.count > 1 ? 's' : ''}` : 'Bientôt disponible'}
+              </p>
+            </div>
+            <Icon name="ph:caret-right-bold" class="size-4 shrink-0 text-ink-faint transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-accent" />
+          </a>
+        ))}
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Base>
