@@ -123,6 +123,7 @@ const { name = 'commune' } = Astro.props;
       hidden.value = slug;
       search.value = slug ? name : '';
       options.forEach((o) => o.setAttribute('aria-selected', String((o.dataset.value ?? '') === slug)));
+      hidden.dispatchEvent(new Event('change', { bubbles: true }));
     };
 
     // Reconcile free-typed text on close: exact match wins, else revert.

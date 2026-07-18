@@ -4,6 +4,7 @@ import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import BusinessCard from '../../components/BusinessCard.astro';
 import SortSelect from '../../components/SortSelect.astro';
+import CommuneSelect from '../../components/CommuneSelect.astro';
 import { Icon } from 'astro-icon/components';
 import { categories } from '../../data/categories';
 import { businesses } from '../../data/businesses';
@@ -17,37 +18,46 @@ export function getStaticPaths() {
 
 const { category, list } = Astro.props;
 const base = import.meta.env.BASE_URL;
-const communesInList = [...new Set(list.map((b) => b.commune))].sort().map((name) => ({
-  name,
-  count: list.filter((b) => b.commune === name).length,
-}));
 ---
 
 <Base title={`${category.name} à Charleroi Métropole · charleroi.info`} description={`Trouvez les meilleurs établissements de la catégorie ${category.name} à Charleroi et dans toutes les communes.`}>
   <Header />
 
   <main id="contenu" class="bg-surface-muted pb-20">
-    <!-- Breadcrumb -->
-    <nav aria-label="Fil d’Ariane" class="border-b border-border bg-surface">
-      <div class="u-container flex items-center gap-1.5 py-3 text-sm text-ink-faint">
-        <a href={base} class="transition-colors hover:text-accent">Accueil</a>
-        <Icon name="ph:caret-right-bold" class="size-3" />
-        <a href={`${base}annuaire`} class="transition-colors hover:text-accent">Annuaire</a>
-        <Icon name="ph:caret-right-bold" class="size-3" />
-        <span class="text-ink">{category.name}</span>
-      </div>
-    </nav>
-
-    <!-- Title -->
+    <!-- Barre de recherche (haut de page) -->
     <div class="border-b border-border bg-surface">
-      <div class="u-container flex items-center gap-3 py-8">
-        <span class="grid size-12 place-items-center rounded-[10px] bg-accent-tint text-accent">
-          <Icon name={`ph:${category.icon}`} class="size-7" />
-        </span>
-        <div>
-          <span class="section-mark"></span>
+      <div class="u-container py-5">
+        <nav aria-label="Fil d’Ariane" class="mb-4 flex items-center gap-1.5 text-sm text-ink-faint">
+          <a href={base} class="transition-colors hover:text-accent">Accueil</a>
+          <Icon name="ph:caret-right-bold" class="size-3" />
+          <a href={`${base}annuaire`} class="transition-colors hover:text-accent">Annuaire</a>
+          <Icon name="ph:caret-right-bold" class="size-3" />
+          <span class="text-ink">{category.name}</span>
+        </nav>
+
+        <div class="mb-4 flex items-center gap-3">
+          <span class="grid size-11 place-items-center rounded-[10px] bg-accent-tint text-accent">
+            <Icon name={`ph:${category.icon}`} class="size-6" />
+          </span>
           <h1 class="text-2xl font-extrabold tracking-tight sm:text-3xl">{category.name}</h1>
         </div>
+
+        <form
+          data-search-bar
+          class="rounded-[12px] border border-border-strong bg-surface p-2 shadow-[0_1px_2px_rgba(15,23,41,0.04)] sm:flex sm:items-stretch sm:gap-2"
+        >
+          <div class="flex flex-1 items-center gap-2.5 px-3 py-2.5">
+            <Icon name="ph:magnifying-glass-bold" class="size-5 shrink-0 text-ink-faint" />
+            <label for="q" class="sr-only">Filtrer dans {category.name}</label>
+            <input id="q" name="q" type="search" autocomplete="off" placeholder={`Rechercher dans ${category.name}…`} class="w-full bg-transparent text-[1rem] text-ink outline-none placeholder:text-ink-faint" data-q />
+          </div>
+          <div class="my-1 hidden w-px bg-border sm:block"></div>
+          <CommuneSelect />
+          <button type="submit" class="btn btn-primary mt-2 w-full sm:mt-0 sm:w-auto">
+            <Icon name="ph:magnifying-glass-bold" class="size-4" />
+            Rechercher
+          </button>
+        </form>
       </div>
     </div>
 
@@ -70,7 +80,7 @@ const communesInList = [...new Set(list.map((b) => b.commune))].sort().map((name
             Filtres
           </button>
 
-          <!-- Sidebar -->
+          <!-- Sidebar facettes -->
           <aside class="hidden lg:block" data-filters-panel>
             <div class="space-y-6 rounded-[12px] border border-border bg-surface p-5" data-filters>
               <div class="flex items-center justify-between">
@@ -78,12 +88,7 @@ const communesInList = [...new Set(list.map((b) => b.commune))].sort().map((name
                 <button type="button" class="text-sm font-semibold text-accent transition-colors hover:text-accent-hover" data-reset>Réinitialiser</button>
               </div>
 
-              <div class="flex items-center gap-2.5 rounded-[8px] border border-border-strong px-3 py-2.5">
-                <Icon name="ph:magnifying-glass-bold" class="size-4 shrink-0 text-ink-faint" />
-                <input type="search" placeholder="Filtrer par nom…" class="w-full bg-transparent text-sm text-ink outline-none placeholder:text-ink-faint" data-q />
-              </div>
-
-              <div class="border-t border-border pt-5">
+              <div>
                 <h3 class="mb-3 text-sm font-bold text-ink">Disponibilité</h3>
                 <label class="flex cursor-pointer items-center gap-2.5 py-1 text-sm text-ink-soft transition-colors hover:text-ink">
                   <input type="checkbox" class="size-4 accent-[#0e4fc0]" data-open />
@@ -105,21 +110,6 @@ const communesInList = [...new Set(list.map((b) => b.commune))].sort().map((name
                   </label>
                 ))}
               </div>
-
-              {communesInList.length > 1 && (
-                <div class="border-t border-border pt-5">
-                  <h3 class="mb-3 text-sm font-bold text-ink">Communes</h3>
-                  <div class="space-y-0.5">
-                    {communesInList.map((c) => (
-                      <label class="flex cursor-pointer items-center gap-2.5 py-1 text-sm text-ink-soft transition-colors hover:text-ink">
-                        <input type="checkbox" class="size-4 accent-[#0e4fc0]" data-com value={c.name} />
-                        <span class="flex-1">{c.name}</span>
-                        <span class="text-xs text-ink-faint">{c.count}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           </aside>
 
@@ -162,31 +152,36 @@ const communesInList = [...new Set(list.map((b) => b.commune))].sort().map((name
 
 <script>
   const panel = document.querySelector<HTMLElement>('[data-filters]');
-  if (panel) {
+  const bar = document.querySelector<HTMLElement>('[data-search-bar]');
+  if (panel && bar) {
     const grid = document.querySelector<HTMLElement>('[data-grid]')!;
     const cards = Array.from(grid.querySelectorAll<HTMLElement>('[data-card]'));
-    const qInput = panel.querySelector<HTMLInputElement>('[data-q]')!;
+    const qInput = bar.querySelector<HTMLInputElement>('[data-q]')!;
+    const communeInput = bar.querySelector<HTMLInputElement>('[data-commune-input]')!;
     const openBox = panel.querySelector<HTMLInputElement>('[data-open]')!;
     const ratingRadios = Array.from(panel.querySelectorAll<HTMLInputElement>('[data-rating]'));
-    const comBoxes = Array.from(panel.querySelectorAll<HTMLInputElement>('[data-com]'));
     const sortSel = document.querySelector<HTMLSelectElement>('[data-sort]')!;
     const resetBtn = panel.querySelector<HTMLButtonElement>('[data-reset]')!;
     const countEl = document.querySelector<HTMLElement>('[data-count]');
     const pluralEl = document.querySelector<HTMLElement>('[data-plural]');
 
+    const slugToName: Record<string, string> = {};
+    bar.querySelectorAll<HTMLElement>('.commune-option').forEach((o) => {
+      slugToName[o.dataset.value ?? ''] = o.dataset.name ?? '';
+    });
+
+    let commune = '';
     const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-    const checked = (boxes: HTMLInputElement[]) => boxes.filter((b) => b.checked).map((b) => b.value);
 
     function apply() {
       const q = norm(qInput.value.trim());
-      const coms = checked(comBoxes);
       const minR = Number(ratingRadios.find((r) => r.checked)?.value || '0');
       const openOnly = openBox.checked;
 
       let visible = 0;
       cards.forEach((card) => {
         const okQ = !q || (card.dataset.search || '').includes(q);
-        const okCom = coms.length === 0 || coms.includes(card.dataset.commune || '');
+        const okCom = !commune || card.dataset.commune === commune;
         const okR = Number(card.dataset.rating) >= minR;
         const okOpen = !openOnly || card.dataset.open === '1';
         const show = okQ && okCom && okR && okOpen;
@@ -211,16 +206,20 @@ const communesInList = [...new Set(list.map((b) => b.commune))].sort().map((name
       grid.classList.toggle('hidden', visible === 0);
     }
 
-    [qInput, openBox, sortSel, ...ratingRadios, ...comBoxes].forEach((el) =>
-      el.addEventListener(el === qInput ? 'input' : 'change', apply),
-    );
+    qInput.addEventListener('input', apply);
+    communeInput.addEventListener('change', () => {
+      commune = communeInput.value ? slugToName[communeInput.value] || '' : '';
+      apply();
+    });
+    [openBox, sortSel, ...ratingRadios].forEach((el) => el.addEventListener('change', apply));
+    bar.addEventListener('submit', (e) => { e.preventDefault(); apply(); });
 
     resetBtn.addEventListener('click', () => {
       qInput.value = '';
       openBox.checked = false;
       ratingRadios.forEach((r) => (r.checked = r.value === '0'));
-      comBoxes.forEach((b) => (b.checked = false));
       document.querySelector<HTMLElement>('[data-select-option][data-value="default"]')?.click();
+      bar.querySelector<HTMLElement>('.commune-option[data-value=""]')?.click();
       apply();
     });
 
@@ -230,5 +229,15 @@ const communesInList = [...new Set(list.map((b) => b.commune))].sort().map((name
       const open = aside?.classList.toggle('hidden') === false;
       toggle.setAttribute('aria-expanded', String(open));
     });
+
+    const params = new URLSearchParams(location.search);
+    const q0 = params.get('q');
+    if (q0) qInput.value = q0;
+    const communeSlug = params.get('commune');
+    if (communeSlug) {
+      const opt = bar.querySelector<HTMLElement>(`.commune-option[data-value="${communeSlug}"]`);
+      setTimeout(() => opt?.click(), 0);
+    }
+    apply();
   }
 </script>
