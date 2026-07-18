@@ -1,0 +1,93 @@
+---
+import { Icon } from 'astro-icon/components';
+
+interface Option {
+  value: string;
+  label: string;
+}
+interface Props {
+  options: Option[];
+  name?: string;
+}
+const { options, name = 'sort' } = Astro.props;
+const current = options[0];
+---
+
+<div class="relative" data-select>
+  <input type="hidden" name={name} value={current.value} data-sort />
+
+  <button
+    type="button"
+    class="inline-flex items-center gap-2 rounded-[8px] border border-border-strong bg-surface px-3 py-2 text-sm font-medium text-ink transition-colors hover:bg-surface-muted"
+    data-select-trigger
+    aria-haspopup="listbox"
+    aria-expanded="false"
+  >
+    <span data-select-label>{current.label}</span>
+    <Icon name="ph:caret-down-bold" class="size-3.5 text-ink-faint transition-transform duration-200" data-select-caret />
+  </button>
+
+  <div
+    class="scrollbar-civic absolute right-0 top-[calc(100%+0.4rem)] z-50 hidden max-h-72 min-w-[12rem] overflow-auto rounded-[10px] border border-border bg-surface p-1 shadow-[0_18px_50px_rgba(9,13,22,0.22)]"
+    role="listbox"
+    data-select-menu
+  >
+    {options.map((o) => (
+      <button
+        type="button"
+        role="option"
+        class="group flex w-full items-center gap-2 rounded-[6px] px-3 py-2 text-left text-sm text-ink transition-colors hover:bg-surface-muted aria-selected:bg-accent-tint aria-selected:text-accent"
+        data-select-option
+        data-value={o.value}
+        aria-selected={o.value === current.value ? 'true' : 'false'}
+      >
+        <Icon name="ph:check-bold" class="size-4 shrink-0 text-accent opacity-0 group-aria-selected:opacity-100" />
+        <span class="flex-1">{o.label}</span>
+      </button>
+    ))}
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-select]').forEach((root) => {
+    const input = root.querySelector<HTMLInputElement>('[data-sort]')!;
+    const trigger = root.querySelector<HTMLButtonElement>('[data-select-trigger]')!;
+    const label = root.querySelector<HTMLElement>('[data-select-label]')!;
+    const caret = root.querySelector<HTMLElement>('[data-select-caret]')!;
+    const menu = root.querySelector<HTMLElement>('[data-select-menu]')!;
+    const options = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-select-option]'));
+
+    const open = () => {
+      menu.classList.remove('hidden');
+      trigger.setAttribute('aria-expanded', 'true');
+      caret.style.transform = 'rotate(180deg)';
+    };
+    const close = () => {
+      menu.classList.add('hidden');
+      trigger.setAttribute('aria-expanded', 'false');
+      caret.style.transform = '';
+    };
+
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      menu.classList.contains('hidden') ? open() : close();
+    });
+
+    options.forEach((opt) => {
+      opt.addEventListener('click', () => {
+        options.forEach((o) => o.setAttribute('aria-selected', String(o === opt)));
+        label.textContent = opt.textContent!.trim();
+        input.value = opt.dataset.value ?? '';
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+        close();
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!root.contains(e.target as Node)) close();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') close();
+    });
+  });
+</script>

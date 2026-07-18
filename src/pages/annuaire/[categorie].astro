@@ -3,6 +3,7 @@ import Base from '../../layouts/Base.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import BusinessCard from '../../components/BusinessCard.astro';
+import SortSelect from '../../components/SortSelect.astro';
 import { Icon } from 'astro-icon/components';
 import { categories } from '../../data/categories';
 import { businesses } from '../../data/businesses';
@@ -70,7 +71,7 @@ const communesInList = [...new Set(list.map((b) => b.commune))].sort().map((name
           </button>
 
           <!-- Sidebar -->
-          <aside class="hidden lg:block lg:sticky lg:top-24 lg:self-start" data-filters-panel>
+          <aside class="hidden lg:block" data-filters-panel>
             <div class="space-y-6 rounded-[12px] border border-border bg-surface p-5" data-filters>
               <div class="flex items-center justify-between">
                 <h2 class="font-extrabold tracking-tight">Filtres</h2>
@@ -108,7 +109,7 @@ const communesInList = [...new Set(list.map((b) => b.commune))].sort().map((name
               {communesInList.length > 1 && (
                 <div class="border-t border-border pt-5">
                   <h3 class="mb-3 text-sm font-bold text-ink">Communes</h3>
-                  <div class="scrollbar-civic max-h-56 space-y-0.5 overflow-y-auto pr-1">
+                  <div class="space-y-0.5">
                     {communesInList.map((c) => (
                       <label class="flex cursor-pointer items-center gap-2.5 py-1 text-sm text-ink-soft transition-colors hover:text-ink">
                         <input type="checkbox" class="size-4 accent-[#0e4fc0]" data-com value={c.name} />
@@ -129,18 +130,20 @@ const communesInList = [...new Set(list.map((b) => b.commune))].sort().map((name
                 <span class="font-bold text-ink" data-count>{list.length}</span> établissement<span data-plural>{list.length > 1 ? 's' : ''}</span>
               </p>
               <div class="flex items-center gap-2">
-                <label class="hidden text-sm text-ink-faint sm:inline" for="sort">Trier&nbsp;:</label>
-                <select id="sort" class="cursor-pointer rounded-[8px] border border-border-strong bg-surface px-3 py-2 text-sm font-medium text-ink outline-none" data-sort>
-                  <option value="default">Pertinence</option>
-                  <option value="rating">Mieux notés</option>
-                  <option value="reviews">Plus d’avis</option>
-                  <option value="az">A → Z</option>
-                </select>
+                <span class="hidden text-sm text-ink-faint sm:inline">Trier&nbsp;:</span>
+                <SortSelect
+                  options={[
+                    { value: 'default', label: 'Pertinence' },
+                    { value: 'rating', label: 'Mieux notés' },
+                    { value: 'reviews', label: 'Plus d’avis' },
+                    { value: 'az', label: 'A → Z' },
+                  ]}
+                />
               </div>
             </div>
 
-            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2" data-grid>
-              {list.map((b) => <BusinessCard business={b} />)}
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" data-grid>
+              {list.map((b) => <BusinessCard business={b} compact />)}
             </div>
 
             <div class="hidden rounded-[12px] border border-dashed border-border bg-surface p-12 text-center" data-empty>
@@ -217,7 +220,7 @@ const communesInList = [...new Set(list.map((b) => b.commune))].sort().map((name
       openBox.checked = false;
       ratingRadios.forEach((r) => (r.checked = r.value === '0'));
       comBoxes.forEach((b) => (b.checked = false));
-      sortSel.value = 'default';
+      document.querySelector<HTMLElement>('[data-select-option][data-value="default"]')?.click();
       apply();
     });
 

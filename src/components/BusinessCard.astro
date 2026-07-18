@@ -4,8 +4,9 @@ import type { Business } from '../data/businesses';
 
 interface Props {
   business: Business;
+  compact?: boolean;
 }
-const { business: b } = Astro.props;
+const { business: b, compact = false } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 const search = norm(`${b.name} ${b.category} ${b.commune} ${b.blurb}`);
@@ -36,14 +37,14 @@ const search = norm(`${b.name} ${b.category} ${b.commune} ${b.blurb}`);
     </span>
   </div>
 
-  <div class="flex flex-1 flex-col p-4">
+  <div class={`flex flex-1 flex-col ${compact ? 'p-3.5' : 'p-4'}`}>
     <p class="text-xs font-medium text-ink-faint">{b.category} · {b.commune}</p>
-    <h3 class="mt-1 text-[1.05rem] font-bold leading-snug text-ink transition-colors group-hover:text-accent">
+    <h3 class={`mt-1 font-bold leading-snug text-ink transition-colors group-hover:text-accent ${compact ? 'text-[0.95rem]' : 'text-[1.05rem]'}`}>
       {b.name}
     </h3>
-    <p class="mt-1.5 line-clamp-2 text-sm leading-relaxed text-ink-soft">{b.blurb}</p>
+    <p class={`mt-1.5 text-sm leading-relaxed text-ink-soft ${compact ? 'line-clamp-1' : 'line-clamp-2'}`}>{b.blurb}</p>
 
-    <div class="mt-auto flex items-center gap-2 pt-4">
+    <div class={`mt-auto flex items-center gap-2 ${compact ? 'pt-3' : 'pt-4'}`}>
       <div class="flex items-center gap-0.5">
         {Array.from({ length: 5 }).map((_, i) => (
           <Icon name={i < Math.round(b.rating) ? 'ph:star-fill' : 'ph:star'} class="size-3.5 text-amber-500" />
