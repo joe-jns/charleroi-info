@@ -1,0 +1,191 @@
+---
+import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import BusinessCard from '../components/BusinessCard.astro';
+import { Icon } from 'astro-icon/components';
+import { businesses } from '../data/businesses';
+import { categories } from '../data/categories';
+import { communes } from '../data/communes';
+
+const base = import.meta.env.BASE_URL;
+
+const categoriesPresent = categories.filter((c) =>
+  businesses.some((b) => b.categorySlug === c.slug),
+);
+const communeNames = [...new Set(businesses.map((b) => b.commune))].sort();
+const communesPresent = communeNames.map((name) => ({
+  name,
+  slug: communes.find((c) => c.name === name)?.slug ?? '',
+}));
+---
+
+<Base title="Recherche · charleroi.info" description="Recherchez un commerce, un service ou un professionnel à Charleroi et dans toutes les communes.">
+  <Header />
+
+  <main id="contenu" class="bg-surface-muted pb-20">
+    <!-- Breadcrumb -->
+    <nav aria-label="Fil d’Ariane" class="border-b border-border bg-surface">
+      <div class="u-container flex items-center gap-1.5 py-3 text-sm text-ink-faint">
+        <a href={base} class="transition-colors hover:text-accent">Accueil</a>
+        <Icon name="ph:caret-right-bold" class="size-3" />
+        <span class="text-ink">Recherche</span>
+      </div>
+    </nav>
+
+    <!-- Title -->
+    <div class="border-b border-border bg-surface">
+      <div class="u-container py-8">
+        <span class="section-mark"></span>
+        <h1 class="text-2xl font-extrabold tracking-tight sm:text-3xl">Résultats de recherche</h1>
+        <p class="mt-2 text-ink-soft">
+          <span data-count>{businesses.length}</span> établissement<span data-plural>s</span> sur la métropole.
+        </p>
+      </div>
+    </div>
+
+    <div class="u-container pt-8">
+      <!-- Filtres -->
+      <div class="rounded-[12px] border border-border bg-surface p-4" data-filters>
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div class="flex flex-1 items-center gap-2.5 rounded-[8px] border border-border-strong px-3 py-2.5">
+            <Icon name="ph:magnifying-glass-bold" class="size-4 shrink-0 text-ink-faint" />
+            <input type="search" placeholder="Restaurant, plombier, coiffeur…" class="w-full bg-transparent text-sm text-ink outline-none placeholder:text-ink-faint" data-q />
+          </div>
+          <div class="flex items-center gap-2.5">
+            <button type="button" class="inline-flex items-center gap-1.5 rounded-[8px] border border-border-strong px-3 py-2.5 text-sm font-medium text-ink-soft transition-colors aria-pressed:border-accent aria-pressed:bg-accent-tint aria-pressed:text-accent" aria-pressed="false" data-open-toggle>
+              <span class="size-1.5 rounded-full bg-[#16a34a]"></span>
+              Ouvert maintenant
+            </button>
+            <label class="sr-only" for="sort">Trier</label>
+            <select id="sort" class="cursor-pointer rounded-[8px] border border-border-strong bg-surface px-3 py-2.5 text-sm font-medium text-ink outline-none" data-sort>
+              <option value="default">Pertinence</option>
+              <option value="rating">Mieux notés</option>
+              <option value="reviews">Plus d’avis</option>
+              <option value="az">A → Z</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Catégories -->
+        <div class="no-scrollbar mt-3 flex gap-2 overflow-x-auto border-t border-border pt-3" data-cat-row>
+          <button type="button" class="chip shrink-0 aria-pressed:border-accent-tint-2 aria-pressed:bg-accent-tint aria-pressed:text-accent" aria-pressed="true" data-category="">Toutes les catégories</button>
+          {categoriesPresent.map((c) => (
+            <button type="button" class="chip shrink-0 aria-pressed:border-accent-tint-2 aria-pressed:bg-accent-tint aria-pressed:text-accent" aria-pressed="false" data-category={c.slug}>{c.name}</button>
+          ))}
+        </div>
+
+        <!-- Communes -->
+        <div class="no-scrollbar mt-2 flex gap-2 overflow-x-auto" data-com-row>
+          <button type="button" class="chip shrink-0 aria-pressed:border-accent-tint-2 aria-pressed:bg-accent-tint aria-pressed:text-accent" aria-pressed="true" data-commune="" data-slug="">Toutes les communes</button>
+          {communesPresent.map((c) => (
+            <button type="button" class="chip shrink-0 aria-pressed:border-accent-tint-2 aria-pressed:bg-accent-tint aria-pressed:text-accent" aria-pressed="false" data-commune={c.name} data-slug={c.slug}>{c.name}</button>
+          ))}
+        </div>
+      </div>
+
+      <!-- Résultats -->
+      <div class="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3" data-grid>
+        {businesses.map((b) => <BusinessCard business={b} />)}
+      </div>
+
+      <div class="hidden rounded-[12px] border border-dashed border-border bg-surface p-12 text-center" data-empty>
+        <Icon name="ph:magnifying-glass-bold" class="mx-auto size-8 text-ink-faint" />
+        <p class="mt-3 font-semibold text-ink">Aucun résultat</p>
+        <p class="mt-1 text-sm text-ink-soft">Essayez d’autres mots-clés ou élargissez les filtres.</p>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Base>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-filters]');
+  if (root) {
+    const grid = document.querySelector<HTMLElement>('[data-grid]')!;
+    const cards = Array.from(grid.querySelectorAll<HTMLElement>('[data-card]'));
+    const qInput = root.querySelector<HTMLInputElement>('[data-q]')!;
+    const openToggle = root.querySelector<HTMLButtonElement>('[data-open-toggle]')!;
+    const sortSel = root.querySelector<HTMLSelectElement>('[data-sort]')!;
+    const catBtns = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-category]'));
+    const comBtns = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-commune]'));
+    const countEl = document.querySelector<HTMLElement>('[data-count]');
+    const pluralEl = document.querySelector<HTMLElement>('[data-plural]');
+
+    let category = '';
+    let commune = '';
+    let openOnly = false;
+
+    const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+
+    function setActive(btns: HTMLButtonElement[], active: HTMLButtonElement) {
+      btns.forEach((b) => b.setAttribute('aria-pressed', String(b === active)));
+    }
+
+    function apply() {
+      const q = norm(qInput.value.trim());
+      let visible = 0;
+      cards.forEach((card) => {
+        const okQ = !q || (card.dataset.search || '').includes(q);
+        const okCat = !category || card.dataset.category === category;
+        const okCom = !commune || card.dataset.commune === commune;
+        const okOpen = !openOnly || card.dataset.open === '1';
+        const show = okQ && okCat && okCom && okOpen;
+        card.hidden = !show;
+        if (show) visible++;
+      });
+
+      const key = sortSel.value;
+      const shown = cards.filter((c) => !c.hidden);
+      shown.sort((a, b) => {
+        if (key === 'rating') return Number(b.dataset.rating) - Number(a.dataset.rating);
+        if (key === 'reviews') return Number(b.dataset.reviews) - Number(a.dataset.reviews);
+        if (key === 'az') return (a.dataset.search || '').localeCompare(b.dataset.search || '');
+        return cards.indexOf(a) - cards.indexOf(b);
+      });
+      shown.forEach((c) => grid.appendChild(c));
+
+      if (countEl) countEl.textContent = String(visible);
+      if (pluralEl) pluralEl.style.display = visible > 1 ? '' : 'none';
+      document.querySelector('[data-empty]')?.classList.toggle('hidden', visible > 0);
+      grid.classList.toggle('hidden', visible === 0);
+    }
+
+    qInput.addEventListener('input', apply);
+    sortSel.addEventListener('change', apply);
+    openToggle.addEventListener('click', () => {
+      openOnly = !openOnly;
+      openToggle.setAttribute('aria-pressed', String(openOnly));
+      apply();
+    });
+    catBtns.forEach((btn) =>
+      btn.addEventListener('click', () => {
+        category = btn.dataset.category || '';
+        setActive(catBtns, btn);
+        apply();
+      }),
+    );
+    comBtns.forEach((btn) =>
+      btn.addEventListener('click', () => {
+        commune = btn.dataset.commune || '';
+        setActive(comBtns, btn);
+        apply();
+      }),
+    );
+
+    // Pré-remplissage depuis l'URL (?q= et ?commune=slug)
+    const params = new URLSearchParams(location.search);
+    const q0 = params.get('q');
+    if (q0) qInput.value = q0;
+    const communeSlug = params.get('commune');
+    if (communeSlug) {
+      const match = comBtns.find((b) => b.dataset.slug === communeSlug);
+      if (match) {
+        commune = match.dataset.commune || '';
+        setActive(comBtns, match);
+      }
+    }
+    apply();
+  }
+</script>

@@ -136,7 +136,7 @@ const communesInList = [...new Set(list.map((b) => b.commune))].sort();
       const q = norm(qInput.value.trim());
       let visible = 0;
       cards.forEach((card) => {
-        const okQ = !q || norm(card.dataset.name || '').includes(q);
+        const okQ = !q || (card.dataset.search || '').includes(q);
         const okC = !commune || card.dataset.commune === commune;
         const okO = !openOnly || card.dataset.open === '1';
         const show = okQ && okC && okO;
@@ -150,7 +150,7 @@ const communesInList = [...new Set(list.map((b) => b.commune))].sort();
       shown.sort((a, b) => {
         if (key === 'rating') return Number(b.dataset.rating) - Number(a.dataset.rating);
         if (key === 'reviews') return Number(b.dataset.reviews) - Number(a.dataset.reviews);
-        if (key === 'az') return (a.dataset.name || '').localeCompare(b.dataset.name || '');
+        if (key === 'az') return (a.dataset.search || '').localeCompare(b.dataset.search || '');
         return cards.indexOf(a) - cards.indexOf(b);
       });
       shown.forEach((c) => grid.appendChild(c));

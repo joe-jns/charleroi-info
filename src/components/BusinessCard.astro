@@ -7,13 +7,16 @@ interface Props {
 }
 const { business: b } = Astro.props;
 const base = import.meta.env.BASE_URL;
+const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const search = norm(`${b.name} ${b.category} ${b.commune} ${b.blurb}`);
 ---
 
 <a
   href={`${base}business/${b.slug}`}
   class="group flex flex-col overflow-hidden rounded-[12px] border border-border bg-surface transition-all duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-[0_12px_30px_rgba(15,23,41,0.08)]"
   data-card
-  data-name={`${b.name} ${b.category}`.toLowerCase()}
+  data-search={search}
+  data-category={b.categorySlug}
   data-commune={b.commune}
   data-open={b.openNow ? '1' : '0'}
   data-rating={b.rating}
