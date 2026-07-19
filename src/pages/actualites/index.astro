@@ -1,0 +1,85 @@
+---
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import { Icon } from 'astro-icon/components';
+import { articles } from '../../data/articles';
+
+const base = import.meta.env.BASE_URL;
+const featured = articles[0];
+const rest = articles.slice(1);
+const rubriques = [...new Set(articles.map((a) => a.category))].sort();
+---
+
+<Base title="Actualités de Charleroi Métropole · charleroi.info" description="Toute l’actualité locale de Charleroi et de ses communes : urbanisme, culture, économie, sport, mobilité.">
+  <Header />
+
+  <main id="contenu" class="bg-surface-muted pb-20">
+    <div class="border-b border-border bg-surface">
+      <div class="u-container py-8">
+        <nav aria-label="Fil d’Ariane" class="mb-4 flex items-center gap-1.5 text-sm text-ink-faint">
+          <a href={base} class="transition-colors hover:text-accent">Accueil</a>
+          <Icon name="ph:caret-right-bold" class="size-3" />
+          <span class="text-ink">Actualités</span>
+        </nav>
+        <span class="section-mark"></span>
+        <h1 class="text-2xl font-extrabold tracking-tight sm:text-3xl">Actualités</h1>
+        <p class="mt-2 max-w-[54ch] text-ink-soft">
+          Toute la vie de Charleroi Métropole : urbanisme, culture, économie, sport et mobilité.
+        </p>
+      </div>
+    </div>
+
+    <div class="u-container pt-8">
+      <!-- À la une -->
+      <ArticleCard article={featured} featured />
+
+      <!-- Filtre rubriques -->
+      <div class="no-scrollbar mt-10 flex gap-2 overflow-x-auto" data-chips>
+        <button type="button" class="chip shrink-0 aria-pressed:border-accent-tint-2 aria-pressed:bg-accent-tint aria-pressed:text-accent" aria-pressed="true" data-rubrique="">Toutes</button>
+        {rubriques.map((r) => (
+          <button type="button" class="chip shrink-0 aria-pressed:border-accent-tint-2 aria-pressed:bg-accent-tint aria-pressed:text-accent" aria-pressed="false" data-rubrique={r}>{r}</button>
+        ))}
+      </div>
+
+      <!-- Grille -->
+      <div class="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3" data-grid>
+        {rest.map((a) => <ArticleCard article={a} />)}
+      </div>
+
+      <div class="hidden rounded-[12px] border border-dashed border-border bg-surface p-12 text-center" data-empty>
+        <Icon name="ph:newspaper-bold" class="mx-auto size-8 text-ink-faint" />
+        <p class="mt-3 font-semibold text-ink">Aucun article</p>
+        <p class="mt-1 text-sm text-ink-soft">Aucune actualité dans cette rubrique pour l’instant.</p>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Base>
+
+<script>
+  const chipsRow = document.querySelector<HTMLElement>('[data-chips]');
+  const grid = document.querySelector<HTMLElement>('[data-grid]');
+  if (chipsRow && grid) {
+    const chips = Array.from(chipsRow.querySelectorAll<HTMLButtonElement>('[data-rubrique]'));
+    const cards = Array.from(grid.querySelectorAll<HTMLElement>('[data-card]'));
+    const empty = document.querySelector<HTMLElement>('[data-empty]');
+
+    chips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const r = chip.dataset.rubrique || '';
+        chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+        let visible = 0;
+        cards.forEach((card) => {
+          const show = !r || card.dataset.category === r;
+          card.hidden = !show;
+          if (show) visible++;
+        });
+        empty?.classList.toggle('hidden', visible > 0);
+        grid.classList.toggle('hidden', visible === 0);
+      });
+    });
+  }
+</script>
