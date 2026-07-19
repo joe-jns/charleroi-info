@@ -1,0 +1,45 @@
+---
+import { Icon } from 'astro-icon/components';
+import type { Deal } from '../data/deals';
+
+interface Props {
+  deal: Deal;
+}
+const { deal: dl } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const search = norm(`${dl.title} ${dl.business} ${dl.category} ${dl.commune}`);
+---
+
+<a
+  href={`${base}deals/${dl.slug}`}
+  class="group flex flex-col overflow-hidden rounded-[12px] border border-border bg-surface transition-all duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-[0_12px_30px_rgba(15,23,41,0.08)]"
+  data-card
+  data-search={search}
+  data-category={dl.category}
+  data-commune={dl.commune}
+>
+  <div class="relative aspect-[16/10] overflow-hidden bg-surface-muted">
+    {/* TODO: vraie photo de l'offre */}
+    <img src={`https://picsum.photos/seed/${dl.imageSeed}/720/450`} alt={dl.title} loading="lazy" class="size-full object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
+    <span class="absolute left-3 top-3 inline-flex items-center rounded-[8px] bg-accent px-2.5 py-1 text-sm font-extrabold text-accent-ink shadow-[0_4px_12px_rgba(14,79,192,0.35)]">
+      {dl.discount}
+    </span>
+  </div>
+  <div class="flex flex-1 flex-col p-4">
+    <p class="text-xs font-medium text-ink-faint">{dl.category} · {dl.commune}</p>
+    <h3 class="mt-1 text-[1.05rem] font-bold leading-snug text-ink transition-colors group-hover:text-accent">{dl.title}</h3>
+    <p class="mt-0.5 text-sm font-medium text-ink-faint">{dl.business}</p>
+    <p class="mt-1.5 line-clamp-2 text-sm leading-relaxed text-ink-soft">{dl.blurb}</p>
+    <div class="mt-auto flex items-center justify-between gap-2 pt-4">
+      <span class="inline-flex items-center gap-1 text-xs text-ink-faint">
+        <Icon name="ph:clock-bold" class="size-3.5" />
+        Jusqu’au {dl.validUntil}
+      </span>
+      <span class="inline-flex items-center gap-1 text-sm font-semibold text-accent">
+        Voir l’offre
+        <Icon name="ph:caret-right-bold" class="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+      </span>
+    </div>
+  </div>
+</a>

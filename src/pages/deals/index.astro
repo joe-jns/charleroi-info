@@ -1,0 +1,186 @@
+---
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import DealCard from '../../components/DealCard.astro';
+import SortSelect from '../../components/SortSelect.astro';
+import CommuneSelect from '../../components/CommuneSelect.astro';
+import { Icon } from 'astro-icon/components';
+import { deals } from '../../data/deals';
+
+const base = import.meta.env.BASE_URL;
+const categoriesPresent = [...new Set(deals.map((d) => d.category))].sort();
+---
+
+<Base title="Bons plans à Charleroi Métropole · charleroi.info" description="Réductions et offres en cours chez les commerçants de Charleroi et de toutes les communes.">
+  <Header />
+
+  <main id="contenu" class="bg-surface-muted pb-20">
+    <div class="border-b border-border bg-surface">
+      <div class="u-container py-5">
+        <nav aria-label="Fil d’Ariane" class="mb-4 flex items-center gap-1.5 text-sm text-ink-faint">
+          <a href={base} class="transition-colors hover:text-accent">Accueil</a>
+          <Icon name="ph:caret-right-bold" class="size-3" />
+          <span class="text-ink">Bons plans</span>
+        </nav>
+
+        <div class="mb-4 flex items-center gap-3">
+          <span class="grid size-11 place-items-center rounded-[10px] bg-accent-tint text-accent">
+            <Icon name="ph:tag-bold" class="size-6" />
+          </span>
+          <h1 class="text-2xl font-extrabold tracking-tight sm:text-3xl">Bons plans du moment</h1>
+        </div>
+
+        <form data-search-bar class="rounded-[12px] border border-border-strong bg-surface p-2 shadow-[0_1px_2px_rgba(15,23,41,0.04)] sm:flex sm:items-stretch sm:gap-2">
+          <div class="flex flex-1 items-center gap-2.5 px-3 py-2.5">
+            <Icon name="ph:magnifying-glass-bold" class="size-5 shrink-0 text-ink-faint" />
+            <label for="q" class="sr-only">Rechercher un bon plan</label>
+            <input id="q" name="q" type="search" autocomplete="off" placeholder="Offre, commerce…" class="w-full bg-transparent text-[1rem] text-ink outline-none placeholder:text-ink-faint" data-q />
+          </div>
+          <div class="my-1 hidden w-px bg-border sm:block"></div>
+          <CommuneSelect />
+          <button type="submit" class="btn btn-primary mt-2 w-full sm:mt-0 sm:w-auto">
+            <Icon name="ph:magnifying-glass-bold" class="size-4" />
+            Rechercher
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="u-container pt-8 lg:grid lg:grid-cols-[270px_1fr] lg:gap-8">
+      <button type="button" class="mb-4 inline-flex items-center gap-2 rounded-[8px] border border-border-strong bg-surface px-4 py-2.5 text-sm font-semibold text-ink lg:hidden" data-filters-toggle aria-expanded="false">
+        <Icon name="ph:sliders-horizontal-bold" class="size-4" />
+        Filtres
+      </button>
+
+      <aside class="hidden lg:block" data-filters-panel>
+        <div class="space-y-6 rounded-[12px] border border-border bg-surface p-5" data-filters>
+          <div class="flex items-center justify-between">
+            <h2 class="font-extrabold tracking-tight">Filtres</h2>
+            <button type="button" class="text-sm font-semibold text-accent transition-colors hover:text-accent-hover" data-reset>Réinitialiser</button>
+          </div>
+          <div>
+            <h3 class="mb-3 text-sm font-bold text-ink">Catégorie</h3>
+            <div class="space-y-0.5">
+              {categoriesPresent.map((c) => (
+                <label class="flex cursor-pointer items-center gap-2.5 py-1 text-sm text-ink-soft transition-colors hover:text-ink">
+                  <input type="checkbox" class="size-4 accent-[#0e4fc0]" data-category value={c} />
+                  <span class="flex-1">{c}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <div>
+        <div class="mb-5 flex items-center justify-between gap-4">
+          <p class="text-sm text-ink-soft">
+            <span class="font-bold text-ink" data-count>{deals.length}</span> offre<span data-plural>s</span>
+          </p>
+          <div class="flex items-center gap-2">
+            <span class="hidden text-sm text-ink-faint sm:inline">Trier&nbsp;:</span>
+            <SortSelect options={[{ value: 'default', label: 'Pertinence' }, { value: 'az', label: 'A → Z' }]} />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" data-grid>
+          {deals.map((d) => <DealCard deal={d} />)}
+        </div>
+
+        <div class="hidden rounded-[12px] border border-dashed border-border bg-surface p-12 text-center" data-empty>
+          <Icon name="ph:tag-bold" class="mx-auto size-8 text-ink-faint" />
+          <p class="mt-3 font-semibold text-ink">Aucun bon plan</p>
+          <p class="mt-1 text-sm text-ink-soft">Essayez d’élargir vos filtres.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Base>
+
+<script>
+  const panel = document.querySelector<HTMLElement>('[data-filters]');
+  const bar = document.querySelector<HTMLElement>('[data-search-bar]');
+  if (panel && bar) {
+    const grid = document.querySelector<HTMLElement>('[data-grid]')!;
+    const cards = Array.from(grid.querySelectorAll<HTMLElement>('[data-card]'));
+    const qInput = bar.querySelector<HTMLInputElement>('[data-q]')!;
+    const communeInput = bar.querySelector<HTMLInputElement>('[data-commune-input]')!;
+    const catBoxes = Array.from(panel.querySelectorAll<HTMLInputElement>('[data-category]'));
+    const sortSel = document.querySelector<HTMLSelectElement>('[data-sort]')!;
+    const resetBtn = panel.querySelector<HTMLButtonElement>('[data-reset]')!;
+    const countEl = document.querySelector<HTMLElement>('[data-count]');
+    const pluralEl = document.querySelector<HTMLElement>('[data-plural]');
+
+    const slugToName: Record<string, string> = {};
+    bar.querySelectorAll<HTMLElement>('.commune-option').forEach((o) => {
+      slugToName[o.dataset.value ?? ''] = o.dataset.name ?? '';
+    });
+
+    let commune = '';
+    const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    const checked = (boxes: HTMLInputElement[]) => boxes.filter((b) => b.checked).map((b) => b.value);
+
+    function apply() {
+      const q = norm(qInput.value.trim());
+      const cats = checked(catBoxes);
+      let visible = 0;
+      cards.forEach((card) => {
+        const okQ = !q || (card.dataset.search || '').includes(q);
+        const okCom = !commune || card.dataset.commune === commune;
+        const okC = cats.length === 0 || cats.includes(card.dataset.category || '');
+        const show = okQ && okCom && okC;
+        card.hidden = !show;
+        if (show) visible++;
+      });
+
+      if (sortSel.value === 'az') {
+        cards.filter((c) => !c.hidden)
+          .sort((a, b) => (a.dataset.search || '').localeCompare(b.dataset.search || ''))
+          .forEach((c) => grid.appendChild(c));
+      } else {
+        cards.forEach((c) => grid.appendChild(c));
+      }
+
+      if (countEl) countEl.textContent = String(visible);
+      if (pluralEl) pluralEl.style.display = visible > 1 ? '' : 'none';
+      document.querySelector('[data-empty]')?.classList.toggle('hidden', visible > 0);
+      grid.classList.toggle('hidden', visible === 0);
+    }
+
+    qInput.addEventListener('input', apply);
+    communeInput.addEventListener('change', () => {
+      commune = communeInput.value ? slugToName[communeInput.value] || '' : '';
+      apply();
+    });
+    [sortSel, ...catBoxes].forEach((el) => el.addEventListener('change', apply));
+    bar.addEventListener('submit', (e) => { e.preventDefault(); apply(); });
+
+    resetBtn.addEventListener('click', () => {
+      qInput.value = '';
+      catBoxes.forEach((b) => (b.checked = false));
+      document.querySelector<HTMLElement>('[data-select-option][data-value="default"]')?.click();
+      bar.querySelector<HTMLElement>('.commune-option[data-value=""]')?.click();
+      apply();
+    });
+
+    const toggle = document.querySelector<HTMLButtonElement>('[data-filters-toggle]');
+    const aside = document.querySelector<HTMLElement>('[data-filters-panel]');
+    toggle?.addEventListener('click', () => {
+      const open = aside?.classList.toggle('hidden') === false;
+      toggle.setAttribute('aria-expanded', String(open));
+    });
+
+    const params = new URLSearchParams(location.search);
+    const q0 = params.get('q');
+    if (q0) qInput.value = q0;
+    const communeSlug = params.get('commune');
+    if (communeSlug) {
+      const opt = bar.querySelector<HTMLElement>(`.commune-option[data-value="${communeSlug}"]`);
+      setTimeout(() => opt?.click(), 0);
+    }
+    apply();
+  }
+</script>
