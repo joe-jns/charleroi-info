@@ -1,0 +1,94 @@
+---
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import AnnonceCard from '../../components/AnnonceCard.astro';
+import { Icon } from 'astro-icon/components';
+import { annonces, type Annonce } from '../../data/annonces';
+
+export function getStaticPaths() {
+  return annonces.map((a) => ({ params: { slug: a.slug }, props: { annonce: a } }));
+}
+
+const { annonce: a } = Astro.props as { annonce: Annonce };
+const base = import.meta.env.BASE_URL;
+const similar = annonces.filter((x) => x.category === a.category && x.slug !== a.slug).slice(0, 3);
+const contact = `mailto:annonces@charleroi.info?subject=${encodeURIComponent('Annonce : ' + a.title)}`;
+---
+
+<Base title={`${a.title} — ${a.price} · charleroi.info`} description={a.description.slice(0, 150)}>
+  <Header />
+
+  <main id="contenu" class="bg-surface-muted pb-20">
+    <nav aria-label="Fil d’Ariane" class="border-b border-border bg-surface">
+      <div class="u-container flex items-center gap-1.5 py-3 text-sm text-ink-faint">
+        <a href={base} class="transition-colors hover:text-accent">Accueil</a>
+        <Icon name="ph:caret-right-bold" class="size-3" />
+        <a href={`${base}annonces`} class="transition-colors hover:text-accent">Petites annonces</a>
+        <Icon name="ph:caret-right-bold" class="size-3" />
+        <span class="truncate text-ink">{a.title}</span>
+      </div>
+    </nav>
+
+    <div class="u-container pt-8 grid gap-8 lg:grid-cols-3">
+      <!-- Visuel + description -->
+      <div class="space-y-8 lg:col-span-2">
+        <div class="overflow-hidden rounded-[14px] border border-border bg-surface-muted">
+          {/* TODO: vraie photo de l'annonce */}
+          <img src={`https://picsum.photos/seed/${a.imageSeed}/1200/800`} alt={a.title} class="aspect-[3/2] w-full object-cover" loading="eager" />
+        </div>
+
+        <section class="rounded-[12px] border border-border bg-surface p-6">
+          <h2 class="text-xl font-extrabold tracking-tight">Description</h2>
+          <p class="mt-3 whitespace-pre-line leading-relaxed text-ink-soft">{a.description}</p>
+        </section>
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="space-y-6 lg:sticky lg:top-24 lg:self-start">
+        <div class="rounded-[12px] border border-border bg-surface p-5">
+          <p class="text-3xl font-extrabold tracking-tight text-ink">{a.price}</p>
+          <h1 class="mt-1 text-lg font-bold leading-snug text-ink">{a.title}</h1>
+
+          <div class="mt-4 space-y-2.5 border-t border-border pt-4 text-sm">
+            <p class="flex items-center gap-2 text-ink-soft"><Icon name="ph:tag-bold" class="size-4 text-ink-faint" /> {a.category}</p>
+            <p class="flex items-center gap-2 text-ink-soft"><Icon name="ph:map-pin-bold" class="size-4 text-ink-faint" /> {a.commune}</p>
+            {a.condition && <p class="flex items-center gap-2 text-ink-soft"><Icon name="ph:seal-check-bold" class="size-4 text-ink-faint" /> {a.condition}</p>}
+            <p class="flex items-center gap-2 text-ink-soft"><Icon name="ph:clock-bold" class="size-4 text-ink-faint" /> Publié {a.posted}</p>
+          </div>
+
+          <div class="mt-4 flex items-center gap-3 border-t border-border pt-4">
+            <span class="grid size-10 shrink-0 place-items-center rounded-full bg-accent-tint text-sm font-bold text-accent">
+              {a.seller.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()}
+            </span>
+            <div>
+              <p class="text-xs text-ink-faint">Vendeur</p>
+              <p class="font-semibold text-ink">{a.seller}</p>
+            </div>
+          </div>
+
+          <a href={contact} class="btn btn-primary mt-5 w-full">
+            <Icon name="ph:chat-circle-bold" class="size-4" />
+            Contacter le vendeur
+          </a>
+          <button type="button" class="mt-2 inline-flex w-full items-center justify-center gap-1.5 text-xs text-ink-faint transition-colors hover:text-ink">
+            <Icon name="ph:flag-bold" class="size-3.5" />
+            Signaler cette annonce
+          </button>
+        </div>
+      </aside>
+    </div>
+
+    {similar.length > 0 && (
+      <div class="u-container mt-16 border-t border-border pt-14 lg:mt-20 lg:pt-16">
+        <span class="section-mark"></span>
+        <h2 class="text-xl font-extrabold tracking-tight">Annonces similaires</h2>
+        <div class="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-3">
+          {similar.map((s) => <AnnonceCard annonce={s} />)}
+        </div>
+      </div>
+    )}
+  </main>
+
+  <Footer />
+</Base>
