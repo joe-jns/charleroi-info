@@ -1,0 +1,146 @@
+---
+import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { Icon } from 'astro-icon/components';
+
+const base = import.meta.env.BASE_URL;
+
+// DONNÉES PLACEHOLDER (numéros belges réels / orgs réelles, à vérifier avant prod).
+const urgences = [
+  { label: 'Urgences (UE)', number: '112' },
+  { label: 'Police', number: '101' },
+  { label: 'Pompiers · Ambulance', number: '112' },
+  { label: 'Médecin de garde', number: '1733' },
+  { label: 'Pharmacie de garde', number: '0903 99 000' },
+  { label: 'Centre antipoison', number: '070 245 245' },
+];
+
+const themes = [
+  {
+    icon: 'ph:bank-bold',
+    title: 'Administration',
+    items: [
+      { label: 'Hôtel de Ville', value: 'Place Charles II, 6000 Charleroi' },
+      { label: 'Horaires', value: 'Lun–Ven, 8h–16h' },
+      { label: 'Téléphone', value: '+32 71 86 11 11', href: 'tel:+3271861111' },
+      { label: 'Site officiel', value: 'charleroi.be', href: 'https://www.charleroi.be' },
+    ],
+    cta: { label: 'Voir toutes les communes', href: `${base}charleroi` },
+  },
+  {
+    icon: 'ph:bus-bold',
+    title: 'Transports',
+    items: [
+      { label: 'Bus & métro léger', value: 'TEC', href: 'https://www.letec.be' },
+      { label: 'Train', value: 'Gares de Charleroi-Central & Ouest', href: 'https://www.belgiantrain.be' },
+      { label: 'Aéroport', value: 'Brussels South (Gosselies)', href: 'https://www.brussels-charleroi-airport.com' },
+      { label: 'Stationnement', value: 'Parkings & zones payantes en ville' },
+    ],
+  },
+  {
+    icon: 'ph:recycle-bold',
+    title: 'Déchets & propreté',
+    items: [
+      { label: 'Intercommunale', value: 'Tibi', href: 'https://www.tibi.be' },
+      { label: 'Collecte', value: 'Calendrier par rue et par commune' },
+      { label: 'Recyparcs', value: 'Accès avec la carte d’identité' },
+      { label: 'Encombrants', value: 'Enlèvement sur rendez-vous' },
+    ],
+  },
+  {
+    icon: 'ph:drop-bold',
+    title: 'Énergie & eau',
+    items: [
+      { label: 'Eau', value: 'SWDE', href: 'https://www.swde.be' },
+      { label: 'Électricité & gaz', value: 'ORES', href: 'https://www.ores.be' },
+      { label: 'Panne d’électricité', value: '078 78 78 00' },
+      { label: 'Odeur de gaz', value: '0800 87 087' },
+    ],
+  },
+];
+---
+
+<Base title="Infos pratiques — Charleroi Métropole · charleroi.info" description="Urgences, administration, transports, déchets et énergie : tous les numéros et services utiles de Charleroi Métropole.">
+  <Header />
+
+  <main id="contenu" class="bg-surface-muted pb-20">
+    <nav aria-label="Fil d’Ariane" class="border-b border-border bg-surface">
+      <div class="u-container flex items-center gap-1.5 py-3 text-sm text-ink-faint">
+        <a href={base} class="transition-colors hover:text-accent">Accueil</a>
+        <Icon name="ph:caret-right-bold" class="size-3" />
+        <span class="text-ink">Infos pratiques</span>
+      </div>
+    </nav>
+
+    <div class="border-b border-border bg-surface">
+      <div class="u-container py-10">
+        <span class="section-mark"></span>
+        <h1 class="text-2xl font-extrabold tracking-tight sm:text-3xl">Infos pratiques</h1>
+        <p class="mt-2 max-w-[56ch] text-ink-soft">
+          Les numéros et services utiles de Charleroi Métropole : urgences, administration,
+          transports, déchets et énergie.
+        </p>
+      </div>
+    </div>
+
+    <!-- Urgences -->
+    <section class="u-container pt-10">
+      <div class="flex items-center gap-2.5">
+        <Icon name="ph:phone-call-bold" class="size-5 text-accent" />
+        <h2 class="text-xl font-extrabold tracking-tight">Numéros d’urgence</h2>
+      </div>
+      <div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        {urgences.map((u) => (
+          <a href={`tel:${u.number.replace(/\s/g, '')}`} class="rounded-[12px] border border-border bg-surface p-4 text-center transition-colors hover:border-accent-tint-2 hover:bg-accent-tint">
+            <p class="font-mono text-xl font-extrabold text-accent">{u.number}</p>
+            <p class="mt-1 text-xs font-medium text-ink-soft">{u.label}</p>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <!-- Thèmes -->
+    <section class="u-container pt-12">
+      <div class="grid gap-5 md:grid-cols-2">
+        {themes.map((t) => (
+          <div class="flex flex-col rounded-[12px] border border-border bg-surface p-6">
+            <div class="flex items-center gap-3">
+              <span class="grid size-11 place-items-center rounded-[10px] bg-accent-tint text-accent">
+                <Icon name={t.icon} class="size-6" />
+              </span>
+              <h2 class="text-lg font-extrabold tracking-tight">{t.title}</h2>
+            </div>
+            <dl class="mt-4 divide-y divide-border text-sm">
+              {t.items.map((it) => (
+                <div class="flex items-center justify-between gap-4 py-2.5">
+                  <dt class="text-ink-faint">{it.label}</dt>
+                  <dd class="text-right font-medium text-ink">
+                    {it.href ? (
+                      <a href={it.href} target={it.href.startsWith('http') ? '_blank' : undefined} rel={it.href.startsWith('http') ? 'noopener' : undefined} class="text-accent hover:underline">{it.value}</a>
+                    ) : (
+                      it.value
+                    )}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            {t.cta && (
+              <a href={t.cta.href} class="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-accent transition-colors hover:text-accent-hover">
+                {t.cta.label}
+                <Icon name="ph:arrow-right-bold" class="size-4" />
+              </a>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <p class="mt-8 rounded-[10px] border border-border bg-surface p-4 text-sm text-ink-soft">
+        <Icon name="ph:info-bold" class="mr-1 inline size-4 align-[-2px] text-ink-faint" />
+        Informations données à titre indicatif. En cas d’urgence vitale, composez toujours le <strong class="text-ink">112</strong>.
+      </p>
+    </section>
+  </main>
+
+  <Footer />
+</Base>
