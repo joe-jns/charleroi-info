@@ -1,0 +1,208 @@
+---
+import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import SelectField from '../components/SelectField.astro';
+import CommuneSelect from '../components/CommuneSelect.astro';
+import { Icon } from 'astro-icon/components';
+import { categories } from '../data/categories';
+
+const base = import.meta.env.BASE_URL;
+const catOptions = categories.map((c) => ({ value: c.slug, label: c.name }));
+const inputCls =
+  'w-full rounded-[8px] border border-border-strong bg-surface px-3.5 py-2.5 text-[0.95rem] text-ink outline-none transition-colors placeholder:text-ink-faint focus:border-accent';
+
+const benefits = [
+  { icon: 'ph:gift-bold', title: 'Gratuit', text: 'Référencer votre établissement ne coûte rien.' },
+  { icon: 'ph:map-trifold-bold', title: 'Visible partout', text: 'Trouvable dans toute la métropole carolo.' },
+  { icon: 'ph:pencil-simple-bold', title: 'Gérez votre fiche', text: 'Infos, horaires, photos et réponses aux avis.' },
+  { icon: 'ph:megaphone-bold', title: 'Offres & événements', text: 'Publiez vos recrutements et vos événements.' },
+];
+---
+
+<Base title="Ajouter mon entreprise · charleroi.info" description="Référencez gratuitement votre établissement sur charleroi.info et soyez visible auprès de toute la métropole.">
+  <Header />
+
+  <main id="contenu" class="bg-surface-muted pb-20">
+    <nav aria-label="Fil d’Ariane" class="border-b border-border bg-surface">
+      <div class="u-container flex items-center gap-1.5 py-3 text-sm text-ink-faint">
+        <a href={base} class="transition-colors hover:text-accent">Accueil</a>
+        <Icon name="ph:caret-right-bold" class="size-3" />
+        <span class="text-ink">Ajouter mon entreprise</span>
+      </div>
+    </nav>
+
+    <div class="border-b border-border bg-surface">
+      <div class="u-container py-10">
+        <span class="section-mark"></span>
+        <h1 class="text-2xl font-extrabold tracking-tight sm:text-3xl">Ajouter mon entreprise</h1>
+        <p class="mt-2 max-w-[54ch] text-ink-soft">
+          Référencez gratuitement votre établissement sur l’annuaire de Charleroi Métropole.
+          Nous vérifions les informations avant publication.
+        </p>
+      </div>
+    </div>
+
+    <div class="u-container pt-8 lg:grid lg:grid-cols-[1fr_300px] lg:gap-8">
+      <!-- Formulaire -->
+      <div>
+        <form data-add-form class="space-y-8 rounded-[12px] border border-border bg-surface p-6 sm:p-8">
+          <!-- Établissement -->
+          <fieldset class="space-y-4">
+            <legend class="text-lg font-extrabold tracking-tight">L’établissement</legend>
+            <div>
+              <label for="name" class="mb-1.5 block text-sm font-semibold text-ink">Nom de l’établissement <span class="text-accent">*</span></label>
+              <input id="name" name="name" type="text" required placeholder="Ex. Boulangerie Dupont" class={inputCls} />
+            </div>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label class="mb-1.5 block text-sm font-semibold text-ink">Catégorie <span class="text-accent">*</span></label>
+                <SelectField name="categorie" options={catOptions} placeholder="Choisir une catégorie" />
+                <p class="mt-1.5 hidden text-xs font-medium text-red-600" data-err="categorie">Veuillez choisir une catégorie.</p>
+              </div>
+              <div>
+                <label for="phone" class="mb-1.5 block text-sm font-semibold text-ink">Téléphone</label>
+                <input id="phone" name="phone" type="tel" placeholder="+32 71 00 00 00" class={inputCls} />
+              </div>
+            </div>
+            <div>
+              <label for="desc" class="mb-1.5 block text-sm font-semibold text-ink">Description</label>
+              <textarea id="desc" name="description" rows="4" placeholder="Décrivez votre activité en quelques phrases…" class={inputCls}></textarea>
+            </div>
+          </fieldset>
+
+          <!-- Localisation -->
+          <fieldset class="space-y-4 border-t border-border pt-8">
+            <legend class="text-lg font-extrabold tracking-tight">Localisation</legend>
+            <div>
+              <label for="address" class="mb-1.5 block text-sm font-semibold text-ink">Adresse <span class="text-accent">*</span></label>
+              <input id="address" name="address" type="text" required placeholder="Rue et numéro" class={inputCls} />
+            </div>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label class="mb-1.5 block text-sm font-semibold text-ink">Commune <span class="text-accent">*</span></label>
+                <div class="rounded-[8px] border border-border-strong">
+                  <CommuneSelect />
+                </div>
+                <p class="mt-1.5 hidden text-xs font-medium text-red-600" data-err="commune">Veuillez choisir une commune.</p>
+              </div>
+              <div>
+                <label for="postal" class="mb-1.5 block text-sm font-semibold text-ink">Code postal</label>
+                <input id="postal" name="postal" type="text" inputmode="numeric" placeholder="6000" class={inputCls} />
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Contact -->
+          <fieldset class="space-y-4 border-t border-border pt-8">
+            <legend class="text-lg font-extrabold tracking-tight">Contact</legend>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label for="email" class="mb-1.5 block text-sm font-semibold text-ink">E-mail public</label>
+                <input id="email" name="email" type="email" placeholder="contact@exemple.be" class={inputCls} />
+              </div>
+              <div>
+                <label for="website" class="mb-1.5 block text-sm font-semibold text-ink">Site web</label>
+                <input id="website" name="website" type="text" placeholder="exemple.be" class={inputCls} />
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Demandeur -->
+          <fieldset class="space-y-4 border-t border-border pt-8">
+            <legend class="text-lg font-extrabold tracking-tight">Vos coordonnées</legend>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label for="cname" class="mb-1.5 block text-sm font-semibold text-ink">Votre nom <span class="text-accent">*</span></label>
+                <input id="cname" name="contactName" type="text" required placeholder="Prénom et nom" class={inputCls} />
+              </div>
+              <div>
+                <label for="cemail" class="mb-1.5 block text-sm font-semibold text-ink">Votre e-mail <span class="text-accent">*</span></label>
+                <input id="cemail" name="contactEmail" type="email" required placeholder="vous@exemple.be" class={inputCls} />
+              </div>
+            </div>
+            <label class="flex items-start gap-2.5 text-sm text-ink-soft">
+              <input type="checkbox" required class="mt-0.5 size-4 accent-[#0e4fc0]" data-consent />
+              J’atteste être autorisé(e) à référencer cet établissement et j’accepte que ces informations soient publiées.
+            </label>
+          </fieldset>
+
+          <div class="border-t border-border pt-6">
+            <button type="submit" class="btn btn-primary w-full sm:w-auto">
+              <Icon name="ph:paper-plane-tilt-bold" class="size-4" />
+              Envoyer ma demande
+            </button>
+            <p class="mt-3 text-xs text-ink-faint">
+              En envoyant ce formulaire, votre demande est transmise à notre équipe pour vérification.
+            </p>
+          </div>
+        </form>
+
+        <!-- Confirmation (après envoi) -->
+        <div class="hidden rounded-[12px] border border-border bg-surface p-10 text-center" data-success>
+          <span class="mx-auto grid size-14 place-items-center rounded-full bg-accent-tint text-accent">
+            <Icon name="ph:check-bold" class="size-7" />
+          </span>
+          <h2 class="mt-5 text-xl font-extrabold tracking-tight">Demande envoyée&nbsp;!</h2>
+          <p class="mx-auto mt-2 max-w-[46ch] text-ink-soft">
+            Merci. Nous vérifions les informations et votre fiche sera publiée sous quelques jours.
+            Vous recevrez un e-mail de confirmation.
+          </p>
+          <a href={base} class="btn btn-ghost mt-6">Retour à l’accueil</a>
+        </div>
+      </div>
+
+      <!-- Avantages -->
+      <aside class="mt-8 lg:mt-0">
+        <div class="rounded-[12px] border border-border bg-surface p-5">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-ink-faint">Pourquoi référencer ?</h2>
+          <ul class="mt-4 space-y-4">
+            {benefits.map((b) => (
+              <li class="flex gap-3">
+                <span class="grid size-9 shrink-0 place-items-center rounded-[8px] bg-accent-tint text-accent">
+                  <Icon name={b.icon} class="size-5" />
+                </span>
+                <div>
+                  <p class="font-semibold text-ink">{b.title}</p>
+                  <p class="mt-0.5 text-sm text-ink-soft">{b.text}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <Footer />
+</Base>
+
+<script>
+  // Soumission PLACEHOLDER — aucun backend branché pour l'instant.
+  const form = document.querySelector<HTMLFormElement>('[data-add-form]');
+  if (form) {
+    const success = document.querySelector<HTMLElement>('[data-success]');
+    const catInput = form.querySelector<HTMLInputElement>('[name="categorie"]')!;
+    const communeInput = form.querySelector<HTMLInputElement>('[name="commune"]')!;
+    const catErr = form.querySelector<HTMLElement>('[data-err="categorie"]');
+    const comErr = form.querySelector<HTMLElement>('[data-err="commune"]');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      // Champs natifs (required)
+      if (!form.reportValidity()) return;
+
+      // Sélecteurs custom (inputs cachés non couverts par reportValidity)
+      let ok = true;
+      if (!catInput.value) { catErr?.classList.remove('hidden'); ok = false; } else catErr?.classList.add('hidden');
+      if (!communeInput.value) { comErr?.classList.remove('hidden'); ok = false; } else comErr?.classList.add('hidden');
+      if (!ok) return;
+
+      // TODO(DB): envoyer les données à l'API / base de données ici.
+      form.classList.add('hidden');
+      success?.classList.remove('hidden');
+      success?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  }
+</script>
