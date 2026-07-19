@@ -1,0 +1,37 @@
+---
+import { Icon } from 'astro-icon/components';
+import type { Event } from '../data/events';
+
+interface Props {
+  event: Event;
+}
+const { event: e } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const search = norm(`${e.title} ${e.venue} ${e.commune} ${e.category}`);
+---
+
+<a
+  href={`${base}evenements/${e.slug}`}
+  class="group flex items-center gap-4 rounded-[12px] border border-border bg-surface p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-[0_12px_30px_rgba(15,23,41,0.08)]"
+  data-card
+  data-search={search}
+  data-commune={e.commune}
+  data-category={e.category}
+>
+  <div class="grid size-14 shrink-0 place-items-center rounded-[10px] border border-border bg-surface-muted leading-none">
+    <span class="text-lg font-extrabold text-ink">{e.day}</span>
+    <span class="mt-0.5 font-mono text-[0.65rem] font-semibold tracking-wider text-accent">{e.month}</span>
+  </div>
+  <div class="min-w-0 flex-1">
+    <h3 class="truncate font-bold text-ink transition-colors group-hover:text-accent">{e.title}</h3>
+    <p class="mt-0.5 truncate text-sm text-ink-soft">{e.venue} · {e.commune}</p>
+    <p class="mt-1 flex items-center gap-1 text-xs text-ink-faint">
+      <Icon name="ph:clock-bold" class="size-3.5" />
+      {e.time}
+      <span class="mx-1">·</span>
+      {e.category}
+    </p>
+  </div>
+  <Icon name="ph:caret-right-bold" class="size-4 shrink-0 text-ink-faint transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-accent" />
+</a>

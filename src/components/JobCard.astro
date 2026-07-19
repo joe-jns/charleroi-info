@@ -1,0 +1,38 @@
+---
+import { Icon } from 'astro-icon/components';
+import type { Job } from '../data/jobs';
+
+interface Props {
+  job: Job;
+}
+const { job: j } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const search = norm(`${j.title} ${j.company} ${j.commune} ${j.sector} ${j.contract}`);
+---
+
+<a
+  href={`${base}emploi/${j.slug}`}
+  class="group flex items-center gap-4 rounded-[12px] border border-border bg-surface p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-[0_12px_30px_rgba(15,23,41,0.08)]"
+  data-card
+  data-search={search}
+  data-commune={j.commune}
+  data-contract={j.contract}
+  data-sector={j.sector}
+>
+  <span class="grid size-11 shrink-0 place-items-center rounded-[10px] bg-accent-tint text-accent">
+    <Icon name="ph:briefcase-bold" class="size-5" />
+  </span>
+  <div class="min-w-0 flex-1">
+    <h3 class="truncate font-bold text-ink transition-colors group-hover:text-accent">{j.title}</h3>
+    <p class="mt-0.5 truncate text-sm text-ink-soft">{j.company} · {j.commune}</p>
+    <div class="mt-2 flex flex-wrap items-center gap-1.5">
+      <span class="rounded-[6px] bg-accent-tint px-2 py-0.5 text-xs font-semibold text-accent">{j.contract}</span>
+      <span class="rounded-[6px] bg-surface-sunken px-2 py-0.5 text-xs font-medium text-ink-soft">{j.sector}</span>
+    </div>
+  </div>
+  <div class="flex shrink-0 flex-col items-end gap-1.5">
+    <span class="hidden text-xs text-ink-faint sm:inline">{j.posted}</span>
+    <Icon name="ph:caret-right-bold" class="size-4 text-ink-faint transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-accent" />
+  </div>
+</a>

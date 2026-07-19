@@ -1,0 +1,136 @@
+---
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import JobCard from '../../components/JobCard.astro';
+import { Icon } from 'astro-icon/components';
+import { latestJobs, type Job } from '../../data/jobs';
+
+export function getStaticPaths() {
+  return latestJobs.map((j) => ({ params: { slug: j.slug }, props: { job: j } }));
+}
+
+const { job: j } = Astro.props as { job: Job };
+const base = import.meta.env.BASE_URL;
+const similar = latestJobs.filter((x) => x.sector === j.sector && x.slug !== j.slug).slice(0, 3);
+const mailto = `mailto:${j.applyEmail}?subject=${encodeURIComponent('Candidature : ' + j.title)}`;
+---
+
+<Base title={`${j.title} — ${j.company} · charleroi.info`} description={j.description.slice(0, 150)}>
+  <Header />
+
+  <main id="contenu" class="bg-surface-muted pb-20">
+    <nav aria-label="Fil d’Ariane" class="border-b border-border bg-surface">
+      <div class="u-container flex items-center gap-1.5 py-3 text-sm text-ink-faint">
+        <a href={base} class="transition-colors hover:text-accent">Accueil</a>
+        <Icon name="ph:caret-right-bold" class="size-3" />
+        <a href={`${base}emploi`} class="transition-colors hover:text-accent">Emploi</a>
+        <Icon name="ph:caret-right-bold" class="size-3" />
+        <span class="truncate text-ink">{j.title}</span>
+      </div>
+    </nav>
+
+    <div class="border-b border-border bg-surface">
+      <div class="u-container py-8">
+        <div class="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
+          <div>
+            <p class="text-sm font-medium text-ink-faint">{j.company} · {j.commune}</p>
+            <h1 class="mt-1 text-2xl font-extrabold tracking-tight sm:text-3xl">{j.title}</h1>
+            <div class="mt-3 flex flex-wrap items-center gap-2 text-sm">
+              <span class="rounded-[6px] bg-accent-tint px-2.5 py-1 text-xs font-semibold text-accent">{j.contract}</span>
+              <span class="rounded-[6px] bg-surface-sunken px-2.5 py-1 text-xs font-medium text-ink-soft">{j.sector}</span>
+              <span class="text-ink-faint">· {j.schedule}</span>
+              <span class="text-ink-faint">· Publié {j.posted}</span>
+            </div>
+          </div>
+          <a href={mailto} class="btn btn-primary shrink-0">
+            <Icon name="ph:paper-plane-tilt-bold" class="size-4" />
+            Postuler
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="u-container mt-10 grid gap-10 lg:grid-cols-3">
+      <div class="space-y-10 lg:col-span-2">
+        <section>
+          <h2 class="text-xl font-extrabold tracking-tight">Description du poste</h2>
+          <p class="mt-3 max-w-[68ch] leading-relaxed text-ink-soft">{j.description}</p>
+        </section>
+
+        <section>
+          <h2 class="text-xl font-extrabold tracking-tight">Profil recherché</h2>
+          <ul class="mt-4 space-y-2.5">
+            {j.profile.map((p) => (
+              <li class="flex items-start gap-2.5 text-ink-soft">
+                <Icon name="ph:check-circle-fill" class="mt-0.5 size-5 shrink-0 text-accent" />
+                {p}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section class="rounded-[12px] border border-border bg-surface p-6">
+          <h2 class="text-lg font-extrabold tracking-tight">Comment postuler ?</h2>
+          <p class="mt-2 text-ink-soft">
+            Envoyez votre CV et une courte lettre de motivation à
+            <a href={mailto} class="font-semibold text-accent hover:underline">{j.applyEmail}</a>.
+          </p>
+          <a href={mailto} class="btn btn-primary mt-4">
+            <Icon name="ph:paper-plane-tilt-bold" class="size-4" />
+            Postuler par e-mail
+          </a>
+        </section>
+      </div>
+
+      <aside class="space-y-6 lg:sticky lg:top-24 lg:self-start">
+        <div class="rounded-[12px] border border-border bg-surface p-5">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-ink-faint">Récapitulatif</h2>
+          <dl class="mt-4 space-y-3.5 text-sm">
+            <div class="flex items-center gap-3">
+              <Icon name="ph:briefcase-bold" class="size-5 shrink-0 text-accent" />
+              <div><dt class="text-ink-faint">Contrat</dt><dd class="font-medium text-ink">{j.contract} · {j.schedule}</dd></div>
+            </div>
+            <div class="flex items-center gap-3">
+              <Icon name="ph:tag-bold" class="size-5 shrink-0 text-accent" />
+              <div><dt class="text-ink-faint">Secteur</dt><dd class="font-medium text-ink">{j.sector}</dd></div>
+            </div>
+            <div class="flex items-center gap-3">
+              <Icon name="ph:map-pin-bold" class="size-5 shrink-0 text-accent" />
+              <div><dt class="text-ink-faint">Lieu</dt><dd class="font-medium text-ink">{j.commune}</dd></div>
+            </div>
+            <div class="flex items-center gap-3">
+              <Icon name="ph:buildings-bold" class="size-5 shrink-0 text-accent" />
+              <div>
+                <dt class="text-ink-faint">Employeur</dt>
+                <dd class="font-medium text-ink">
+                  {j.businessSlug ? (
+                    <a href={`${base}business/${j.businessSlug}`} class="text-accent hover:underline">{j.company}</a>
+                  ) : (
+                    j.company
+                  )}
+                </dd>
+              </div>
+            </div>
+          </dl>
+          <a href={mailto} class="btn btn-primary mt-5 w-full">
+            <Icon name="ph:paper-plane-tilt-bold" class="size-4" />
+            Postuler
+          </a>
+        </div>
+      </aside>
+    </div>
+
+    {similar.length > 0 && (
+      <div class="u-container mt-16 border-t border-border pt-14 lg:mt-20 lg:pt-16">
+        <span class="section-mark"></span>
+        <h2 class="text-xl font-extrabold tracking-tight">Offres similaires</h2>
+        <div class="mt-6 grid grid-cols-1 gap-3 lg:grid-cols-2">
+          {similar.map((s) => <JobCard job={s} />)}
+        </div>
+      </div>
+    )}
+  </main>
+
+  <Footer />
+</Base>
